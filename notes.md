@@ -790,3 +790,393 @@ Implementar e testar o funcionamento de uma rede de computadores com um hub como
 Usar o comando nslookup para consultar servidores DNS;
 Conectar dispositivos computacionais e de rede usando cabos de conexão.
 
+@03-Switches e monitoramento de tráfego de redes
+
+@@01
+Construindo redes com switches
+
+No exemplo que construímos, utilizamos um dispositivo de rede bem simples, o HUB. Será que conseguimos replicar esse exemplo utilizando outro dispositivo para fazer a interconexão entre os computadores que utilizamos? Vejamos!
+Vamos abrir então o nosso software de simulação, Cisco Packet Tracer.
+
+No exemplo anterior, em que estávamos numa linha de produção, tínhamos três máquinas e para cada máquina tínhamos um computador dedicado. Vamos novamente inserir as três máquinas, ou três PCs.
+
+O primeiro, renomeamos como "Manufatura"; o segundo, como "Acabamento"; e o terceiro como "Máquina de Embalagem", no contexto da indústria têxtil.
+
+Anteriormente nós utilizamos o Hub. Agora, optaremos por um dispositivo de rede conhecido como Switch. Então, no canto inferior esquerdo clicamos em "Network Devices" para acessar os dispositivos de rede. Na segunda opção, "Switch", selecionamos o "2950-24", arrastamos e soltamos na tela.
+
+Já temos o dispositivo de rede. Agora vamos fazer as conexões. Neste caso, quando vamos ligar um dispositivo de rede a um computador, como um PC, utilizamos uma conexão de cabo direto. Então vamos selecionar a conexão de cabo direto, clicar no dispositivo que queremos ligar, selecionar a porta "FastEthernet0", arrastar até o Switch e clicar. Observe que 0 Switch nos dá diferentes portas. Podemos selecionar qualquer uma delas, então vamos optar por "FastEthernet0/1".
+
+Em seguida, repetimos o mesmo processo para a segunda e terceira máquina. Feito isso, o Switch está ligado, conectado nas três máquinas e, ao que parece, está tudo em ordem. Observe que todas as conexões ficaram verdes, ou seja, estão funcionando e os computadores estão conectados no Switch.
+
+Mas falta uma coisa: assim como fizemos no exemplo anterior, precisamos configurar o endereço de IP de cada um desses computadores. Então, clicamos com o botão direito do mouse na máquina da manufatura e uma janela abrirá. Nela, vamos na aba "Desktop" e, depois, na opção "IP Configuration".
+
+Observe que ele preencheu automaticamente a máscara de sub-rede. Vamos, então, arbitrariamente definir um endereço de IP. Digitaremos "193.168.3.1" e teclamos "Enter".
+
+Agora, repetimos o mesmo processo para "Acabamento", definindo o IP como "193.168.3.2". Perceba que estamos mudando apenas o último octeto. Vamos entender melhor por que estamos fazendo isso mais adiante.
+
+Por fim, fazemos o mesmo processo para o computador de embalagem, definindo o IP como "193.168.3.3". Pronto! Todas as nossas máquinas já possuem um endereço de IP.
+
+Vamos testar o funcionamento da nossa rede utilizando novamente o comando Ping para enviar um pacote de dados de um computador para o outro. Vamos enviar um pacote de dados do computador da embalagem para o computador manufatura. Assim, vamos entender, na prática, como funciona o switch.
+
+Antes, vamos mudar aqui o nosso modo de funcionamento do Real-Time para Simulation. Observe que a simulação continua pausada, quando clicarmos na opção de Play, no menu acima dos dispositivos, a simulação será iniciada. À direita, temos um painel de simulação onde podemos verificar todos os protocolos que estão rodando em segundo plano com o funcionamento da nossa rede. Então, vamos dar o ping do computador da embalagem para o computador da manufatura.
+
+Para isso, clicamos com o botão direito do mouse sobre o computador da embalagem e vamos em "Command Prompt", e digitamos ping para o computador que está na nossa rede, 193.168.3.1 - esse foi o endereço de IP que atribuímos manualmente para esse computador.
+
+ping 193.168.3.1
+COPIAR CÓDIGO
+Vamos pressionar Enter, minimizar o Prompt de Comando e dar o Play.
+
+Observem o seguinte aspecto: no primeiro momento, o switch recebeu o pacote de dados, encaminhou para o computador da manufatura e do acabamento. Mas nós sabemos que esse pacote não era destinado para o acabamento. Na sequência, o computador da manufatura respondeu, e o switch encaminhou apenas para o computador da embalagem. Quando o segundo pacote do ping foi enviado pelo computador da embalagem, o switch encaminhou apenas para o computador da manufatura. A partir de agora, ele só vai encaminhar o pacote para o computador da manufatura.
+
+Aqui nós já temos um primeiro dado do comportamento do switch: ele utiliza o protocolo ARP para entender quais dispositivos e quais endereços estão plugados em cada uma das suas portas. Nessa primeira experiência de conexão, ele verifica quem é quem na rede, por isso que ele encaminha a mensagem para os dois computadores que estão plugados nas suas portas. A partir desse primeiro contato, dessa primeira interação, ele armazena na memória interna para qual endereço MAC (que é o endereço físico da placa de rede de cada dispositivo) está associado o endereço de IP.
+
+Cabe ressaltar a diferença entre o endereço MAC e o endereço IP. O endereço MAC é como se fosse uma espécie de RG desse dispositivo, que é utilizado apenas nessa rede interna. Quando esse dispositivo precisa encaminhar um pacote de dados para um computador que está externo a essa rede, ele precisa de um documento, ou seja, de uma identificação universalmente aceita que é o endereço IP.
+
+Neste momento da execução, vemos na nossa tela o último pacote do comando PING ser enviado para o computador da manufatura que está respondendo. Novamente observamos que o switch vai encaminhar essa resposta apenas para o computador da embalagem.
+
+Se olharmos nosso Simulation Panel, vamos observar os protocolos que estavam funcionando durante o comando PING. Nós sabemos que o protocolo ICMP é o protocolo padrão do comando PING. Mas temos, também, o protocolo ARP, que mostra uma série de endereços com os quais não estamos muito acostumados. Esses são os endereços MAC, utilizados na rede interna para localização dos dispositivos, com os quais nós estamos nos comunicando e transferindo dados e outros tipos de arquivos.
+
+Agora que sabemos que cada dispositivo possui um endereço MAC atribuído pelo fabricante da placa de rede que inserimos, seja num desktop ou laptop, podemos conferir se o nosso computador tem acesso a esse endereço MAC. Para isso, vamos clicar no menu "Iniciar" e buscar o Prompt de Comando para abri-lo. Nele, digitamos o comando ipconfig /all.
+
+ipconfig /all
+COPIAR CÓDIGO
+Ao executar, observe que aparece uma série de informações. Para identificarmos o endereço MAC da nossa placa de rede, que está no desktop utilizado para fazer essa aula, por exemplo, vemos a opção "Endereço Físico". Esse é o endereço MAC da nossa placa e é a identificação que é utilizada na rede interna na qual ela está conectada.
+
+Agora, ao conectar-se externamente (na internet), é necessário outro endereço para que outros dispositivos consigam se comunicar, ou seja, consigam enxergar o dispositivo no qual estamos conectados. Esse endereço, como já sabemos, é o endereço IP, atribuído pelo servidor DHCP. Mais adiante, estudaremos o que é esse servidor DHCP.
+
+Já sabemos que o comando ipconfig /all nos retorna uma série de informações e que, para localizar o endereço MAC, que é o endereço da nossa placa de rede, vemos a opção "Endereço Físico".
+
+Já o endereço usado para se conectar à internet, ou seja, aquele em que as pessoas podem enviar informações e a partir do qual também podemos enviar informações para outros dispositivos, é o endereço IPv4. Observe que é um endereço IP com o qual já estamos um pouco mais familiarizados e inclusive inserimos nos computadores da nossa simulação.
+
+Vimos como funciona o switch e o hub. O switch possui uma memória interna para armazenar o mapeamento dos endereços MAC dos diferentes dispositivos que estão plugados nas portas e os seus respectivos endereços IP.
+
+Já o hub não possui esse tipo de memória interna. Portanto, sempre que recebe um pacote de dados, encaminha para todos os dispositivos conectados em suas portas, de modo que esse pacote chegue ao dispositivo de destino.
+
+Outra informação a ser considerada é o congestionamento da rede quando usamos o hub. Porém, vamos analisar sob a ótica da segurança. Imagine que você está compartilhando dados sensíveis em uma rede e não quer que outras pessoas visualizem, por exemplo, quais sites está acessando ou que tipo de informação está transmitindo. Se estiver usando um dispositivo de rede como o hub, algumas pessoas podem utilizar um software de monitoramento de tráfego na rede para identificar os pacotes que estão chegando na máquina delas, monitorando as informações que você está recebendo, os sites que está acessando e, se em alguns desses sites você inseriu alguma informação como senha não criptografada, isso também fica visível para outros usuários que estão na rede, já que o hub envia todos os pacotes para todas as máquinas.
+
+No caso do switch, isso não ocorre porque ele identifica, utilizando o protocolo ARP, quais dispositivos estão conectados em suas portas e quais são os respectivos endereços. Então armazena isso na memória interna e, a partir daí, encaminha os pacotes de dados apenas para os dispositivos aos quais esses pacotes se destinam.
+
+Mas usar o switch não impede todos os riscos de ataques. É possível que algumas pessoas queiram atacar um switch de forma a lotar a memória de endereços MAC desse switch. Uma forma de evitar esse tipo de ataque é limitando dois ou três endereços MAC por cada porta, assim não lota a memória.
+
+Inclusive, após esgotar a memória interna do switch, ele passa a funcionar como hub. Isso significa que ele encaminha todos os pacotes que ele recebe para todos os dispositivos conectados nas portas, pois não é mais capaz de identificar quais dispositivos estão conectados. Então, para assegurar que o dispositivo recebeu o pacote destinado a ele, ele envia para todos os que estão conectados nas portas. Por isso, é importante limitar o número de endereços MAC que podem ser armazenados para cada uma das portas do switch.
+
+Conforme mencionado anteriormente, podemos utilizar o monitoramento de tráfego para analisar pacotes que estão trafegando na nossa rede, inclusive pacotes que não deveriam estar sendo destinados ao nosso computador, se estivermos plugados em um dispositivo de rede como um hub.
+
+No entanto, o monitoramento de tráfego é muito útil para que possamos analisar o que está acontecendo na nossa rede, e é o que veremos na sequência.
+
+@@02
+Hubs ou switches
+
+Hub e switch são dispositivos utilizados para interligar computadores e formar uma rede local Ambos desempenham a função de concentrar e distribuir o tráfego de rede e experimentamos utilizar ambos. Mas existem diferenças significativas entre eles em termos de eficiência e capacidade de gerenciamento.
+Qual a principal diferença a se destacar entre os dispositivos?
+
+O hub não consegue memorizar onde um equipamento está localizado, o Switch sim.
+ 
+Os hubs não conseguem aprender o endereço MAC dos equipamentos de uma rede, já os Switches possuem essa função.
+Alternativa correta
+O hub possui capacidade de conexão sem fio.
+ 
+Alternativa correta
+O switch possui memória RAM.
+
+@@03
+Vulnerabilidade dos switches
+
+Você precisa montar uma rede com switch em um laboratório de informática, quando é indagado sobre as possíveis vulnerabilidades de segurança que esse switch pode apresentar. Então, você indica que há uma forma de ataque usada para conseguir informações passadas no Switch destinadas a outro usuário.
+Selecione a alternativa que corresponde a este ataque.
+
+Inserir vários endereços MAC falsos para “encher” a memória do Switch e fazer com que ele atue como um Hub.
+ 
+Exatamente, esse é um dos principais métodos usados por usuários maliciosos. Ao inserir vários endereços MAC falsos para preencher a memória do Switch, o dispositivo não vai conseguir definir onde cada um realmente está, passando a atuar como um Hub.
+Alternativa correta
+Resetar a memória interna do switch.
+ 
+Alternativa correta
+Resetar a memória não-volátil, pois assim podemos facilmente configurá-lo para redirecionar a informação para nós.
+
+@@04
+Prevenção de ataques
+
+Após explicar a principal vulnerabilidade de segurança dos switches ao coordenador do laboratório de informática, você começa a refletir a respeito de possíveis estratégias de configuração do dispositivo que possam evitar tais ataques.
+Neste contexto, qual modo de prevenção de ataques você poderia sugerir?
+
+
+Alternativa correta
+Construir camadas de segurança na rede.
+ 
+Alternativa correta
+Configurar a opção de segurança na porta, para que fique limitada a receber uma quantidade máxima de endereços MAC.
+ 
+Podemos configurar a porta do Switch para aceitar um número máximo de endereços MAC. Ao ultrapassar esse limite, a porta é desligada e o ataque não ocorre com êxito.
+Alternativa correta
+Inserir um dispositivo de hardware adicional que seja capaz de criar barreiras de segurança na rede.
+
+@@05
+Monitorando o tráfego na rede
+
+Falamos um pouco sobre monitoramento do tráfego de uma rede. Como será que isso é possível? Vamos analisar na prática como usar uma ferramenta aberta que nos permite fazer essa tarefa.
+No Google, vamos digitar Wireshark que é um monitorador de tráfego de rede ethernet. Vamos clicar no primeiro resultado da pesquisa que é o site do wireshark.org.
+
+Ao descer a página, vamos encontrar a opção de fazer o download do Wireshark. Podemos baixar o instalador conforme as especificações da nossa máquina. No nosso caso, vamos baixar o pacote do Windows de 64 bits. Depois é só instalar e vai estar pronto para uso na nossa máquina.
+
+Monitorar o tráfego de redes
+Como já temos o Wireshark instalado no computador, vamos abrir o programa para começar a nossa atividade de monitoramento do tráfego de redes.
+
+A interface inicial consiste em uma barra de menu, barra de ferramentas, barra de filtros e a página de boas-vindas.
+O que vamos fazer nessa página? Selecionar uma interface de rede dentre as diferentes interfaces listadas.
+
+Quando utilizamos o comando ipconfig no terminal do computador, percebemos que haviam várias interfaces. A maior parte delas estava com mídia desconectada. No nosso caso, só estávamos utilizando uma interface, a Ethernet.
+
+Por isso, vamos selecionar essa interface Ethernet onde temos algum tráfego de dados, protocolos sendo executados, pois estamos utilizando de conexão à rede. Damos dois cliques nessa interface e agora vamos ver uma sequência de pacotes de protocolos de comunicação sendo executados.
+
+Nessa janela, temos três painéis. No topo, o painel de lista de pacotes. Abaixo, lado a lado, o painel de detalhes do pacote e o painel de bytes do pacote. Na parte inferior, temos uma barra de status.
+Interface do Wireshark como descrita anteriormente.
+
+Esses protocolos estão de fato acontecendo, é o que está acontecendo por trás da nossa rede. Tem protocolo UDP, TCP e outros que ainda nem conhecemos ainda ao longo do curso. O TCP já aprendemos que atua na camada de aplicação.
+
+Se selecionamos aleatoriamente um desses protocolos, vamos observar uma série de informações no painel de detalhes. Essas informações são relativas às diferentes camadas que constituem a nossa rede.
+
+Por exemplo, temos a opção do Internet Protocol Version 4, que é a camada de rede. Isto é, temos o protocolo IP versão 4 atuando.
+
+Temos outra que é o protocolo UDP (User Datagram Protocol), que está atuando na camada de transporte. Também temos um pacote de dados (data) de 25 bytes que estava trafegando e passando através dessas camadas.
+
+Dessa forma, com o monitorador de tráfego de redes, Wireshark, conseguimos visualizar os protocolos que estão rolando por trás da rede, o pacote de dados que estão mandando e por onde esse pacote passa, ou seja, quais protocolos utilizam em cada uma das camadas.
+
+Não conseguimos identificar o que tem dentro desse pacote, mas observam o tráfego dele na rede e os protocolos que são usados para isso.
+
+Além disso, também é possível observar os cabeçalhos que cada uma dessas camadas adicionam a esse pacote. Como explicamos anteriormente, cada camada adiciona um cabeçalho que é relevante para ela.
+
+Assim, quando esse pacote chegar no endereço de destino, as camadas vão atuar no sentido de retirar esses cabeçalhos de tal forma que a informação fique disponível no aplicativo de quem estiver recebendo uma mensagem, por exemplo. É isso que observamos por trás dos panos (internamente) com o Wireshark.
+
+Teste de monitoramento
+Vamos fazer um teste?
+
+Vamos acessar o navegador e abrir aleatoriamente uma página na internet para verificar se conseguimos identificar o uso do protocolo HTTP, que é presente na camada de aplicação.
+
+No navegador, vamos digitar algum website. Por exemplo, vamos acessar o site da Alura e clicar na opção da "Escola de programação" onde temos várias informações.
+
+Também podemos visitar outros sites. Vamos digitar no Google "programação C", por exemplo. São retornados vários conteúdos de programação C de diferentes universidades, blogs e livros.
+
+Por fim, em outra aba, vamos navegar em mais uma página como o Google. Realizamos uma pesquisa pela "Wikipédia" e encontramos vários resultados.
+
+Desse modo, fizemos algumas pesquisas e usamos bastante o protocolo HTTP no navegador. Agora, vamos verificar se elas aparecem no monitorador de tráfego.
+
+A ferramenta nos possibilita filtrar alguns pacotes por meio dos protocolos que queremos observar melhor.
+
+Agora, conseguimos dar um zoom ao clicar no ícone de lupa da barra de ferramentas, o que nos permite visualizar melhor o que está acontecendo na tela. Dá inclusive pra alterar o tamanho dos painéis.
+
+Antes de selecionar pacotes e observarar o que está ocorrendo, podemos digitar na barra de filtros "HTTP" que é o protocolo que queremos analisar. Selecionamos HTTP e pressionamos "Enter".
+
+O processo de filtro pode ser um pouco lento. Após fazer o filtro, obtivemos alguns resultados. Por exemplo, vamos analisar o primeiro resultado no painel de lista de pacotes.
+
+Com isso, surge no painel de detalhes:
+
+Frame 248101;
+Ethernet II;
+Internet Protocol Version;
+Transmission Control Protocol;
+Hypertext Transfer Protocol.
+Observe que temos o uso do protocolo HTTP (Hypertext Transfer Protocol) na nossa camada de aplicação. Na sequência, temos o uso do protocolo TCP (Transmission Control Protocol) na camada de transporte. Ou seja, prepara um pacote para seguir para a camada de rede, representada pelo protocolo IP (Internet Protocol Version).
+
+Mais à frente, temos o protocolo Ethernet. Nesse ponto, o pacote já está se encaminhando para a transmissão, através da rede física.
+
+O que fizemos?
+Inicialmente, clicamos em algum pacote que queríamos analisar com protocolo HTTP na parte superior da ferramenta que é o painel de lista de pacotes. Na parte inferior esquerda da ferramenta, onde temos o painel de detalhes de pacotes, vamos observar os protocolos que estão rodando nesse pacote selecionado.
+
+Nele, temos o HyperText Transfer Protocol (HTTP) na camada de aplicação. Também temos o Transmission Control Protocol (TCP). Quando selecionamos esse protocolo, abrem informações sobre o protocolo TCP rodando na camada de transporte e preparando o nosso pacote para se encaminhar à camada de rede.
+
+É o que temos na sequência, com o Internet Protocol (IP) versão 4. Em seguida, o pacote vai para a camada Ethernet, onde se prepara para transmissão por meios físicos até atingir o endereço de destino.
+
+Agora que já sabemos como monitorar o tráfego em uma rede, que tal aprimorarmos o projeto que estamos construindo para a fábrica? Vamos pensar em inserir outro dispositivo de rede? É isso que faremos na sequência.
+
+https://www.wireshark.org/
+
+@@06
+Wireshark
+
+Uma amiga estava em dúvida sobre qual ferramenta utilizar para monitorar o tráfego de rede em seu computador. Nesse momento, você lembra do Wireshark e o recomenda.
+Qual principal função do Wireshark você citaria para justificar a utilização dele neste caso?
+
+Analisar protocolos utilizados na troca de pacotes pelo computador, facilitando a solução de problemas na rede.
+ 
+O Wireshark tem como principal utilização analisar protocolos que trafegam na rede com o intuito de verificar problemas que possam existir.
+Alternativa correta
+Analisar o tráfego de rede, fornecendo uma visão detalhada do que está ocorrendo nas diferentes camadas.
+ 
+O Wireshark fornece uma visão detalhada do tráfego baseada nos protocolos que estão atuando na rede.
+Alternativa correta
+Analisar usuários que estão conectados em sua rede.
+
+@@07
+Protocolo TCP
+
+Ao analisar o tráfego em sua rede usando o Wireshark, você observa o uso frequente do protocolo TCP. O Transmission Control Protocol (TCP) é um dos principais protocolos da Internet e fornece um serviço confiável, garantindo a integridade e a ordem dos pacotes.
+Qual seria a principal função deste protocolo?
+
+
+Transportar informações.
+ 
+O protocolo TCP encontra-se acima da camada onde o IP está localizado e ele é responsável por realizar o transporte das informações. Além disso, a camada de transporte possui também outro protocolo bastante conhecido, o UDP.
+Alternativa correta
+Criptografar informações.
+ 
+Alternativa correta
+Endereçamento de pacotes.
+
+@@08
+Máscara de rede
+
+Falamos sobre construção de redes e utilizamos o switch. Vamos voltar ao caso que estamos analisando para a construção da nossa rede. Temos uma empresa do setor de manufatura, uma empresa têxtil. Temos três setores e cada setor tem uma máquina dedicada.
+Porém, vale notar que em muitas empresas temos diferentes setores que possuem diferentes demandas de conexão e velocidade de rede. Nesses casos, é muito prático a configuração de diferentes redes.
+
+Para simplificar, exemplificamos com apenas um PC no setor de manufatura, mas poderíamos ter alguns dispositivos trocando informação entre si e, eventualmente, trocando informações com máquinas em outros setores da empresa.
+
+Por isso, seria mais prudente que tivéssemos uma rede dedicada à manufatura, outra ao acabamento e até outra para o setor da embalagem. Assim como outros setores, como marketing ou vendas.
+
+Dessa forma, você teria a troca eventual de algumas informações entre esses setores, mas cada setor sendo respeitado de acordo com a sua demanda e requisitos de acesso à rede. Alguns com acesso à rede externa, outros apenas à rede interna, como no exemplo da linha de produção.
+
+Estávamos utilizando um switch nessa rede. Havíamos começado com um equipamento mais simples, o hub. Mas, com o switch notamos que tínhamos mais segurança, os pacotes eram caminhados de forma mais eficiente, ele armazenava os endereços dos dispositivos com os quais estava conectado.
+
+No entanto, será que o switch permite configurar diferentes redes e conectar essas redes em suas portas? Podemos testar agora e vamos aprender como configurar uma rede diferente da outra.
+
+Máscara de sub-rede
+Voltamos ao Cisco Packet Tracer. Lembre-se que quando estávamos fazendo o endereçamento, ou seja, configurando o endereço de IP de cada uma das máquinas que conectamos ao switch, clicávamos com o botão direito em cima do PC e abria uma janela. Por exemplo, clicamos no "PC-PT Manufatura".
+
+Nela, selecionávamos a aba "Desktop" e a opção "IP Configuration", onde digitávamos um endereço de IP de forma arbitrária. Afinal, ainda não aprendemos como nomear o endereço de IP, ou seja, as diferentes classes de IP.
+
+Com isso, o endereço em "Subnet Mask" (máscara de sub-rede) era preenchido de forma automática.
+
+IP Configuration: Static
+IPv4 Address: 193.168.3.1
+Subnet Mask: 255.255.255.0
+O que é a máscara de sub-rede? Por que foi automaticamente preenchida? Isso tem relação com a classe de IP que usamos.
+
+Mas, no que isso se reflete na prática? No tópico de construção de diferentes redes?
+
+Esses endereços que são formados por quatro octetos. Assim, temos 32 bits de informação em cada um desses endereços.
+O que a máscara de sub-rede faz é dividir o endereço de IP em dois grupos.
+
+Os grupos de octetos do endereço de IP que estão ordenados com esses octetos na máscara de sub-rede, 255, são um endereço que identifica a rede na qual estamos conectados.
+
+Lembra que quando estávamos configurando cada um desses PCs, estávamos mudando apenas o último octeto. Isso tem exatamente a ver com essa máscara de sub-rede.
+
+É porque apenas esse último octeto era variável. Tínhamos que manter esses três primeiros octetos 193.168.3 para que os três computadores estivessem conectados na mesma rede.
+
+Se modificamos esse primeiro octeto para o PC da manufatura, para o PC do acabamento e também para o PC da embalagem, o que vai acontecer? Eles estarão em três redes diferentes.
+
+A máscara de subrede tem como função identificar qual parte do endereço de IP se refere ao endereço da rede e qual parte podemos usar para modificar e atribuir um endereço diferente dentro dessa rede para cada dispositivo que queremos nos conectar.
+Configuração de diferentes redes
+Vamos modificar o endereço de rede de cada um desses computadores. Em seguida, vamos testar se o switch nos permite conectar essas diferentes redes.
+
+Só vamos modificar o primeiro octeto de cada um. No "PC-PT Manufatura", vamos manter com esse padrão de IP 193.168.3.1.
+
+IPv4 Address: 193.168.3.1
+Clicamos com o botão direito no "PC-PT Acabamento", selecionamos a aba "Desktop" e a opção "IP Configuration". Continuamos com o IP estático. Ao invés de 193, vamos colocar 192. Observe que apertamos "Enter", mas nada modificou.
+
+IPv4 Address: 192.168.3.1
+Por fim, fazemos o mesmo para "PC-PT Embalagem". Modificamos para o primeiro octeto para 191.
+
+IPv4 Address: 191.168.3.1
+As interligações dos PCs continuam verdes, mas agora temos computadores em redes diferentes. A máscara de sub-rede se mantém, porque estamos usando a mesma classe.
+
+Os três primeiros octetos se referem a nova rede que estamos usando para aquele setor. Enquanto o último permite identificar o PC de forma específica.
+Agora que já fizemos a configuração das três diferentes redes, uma para cada setor da nossa linha de produção. Vamos testar a conectividade do computador da manufatura com o computador da embalagem, utilizando o novo endereço de IP que atribuímos ao computador da embalagem.
+
+Vamos clicar com o botão direito em "PC-PT Manufatura", aba "Desktop" e opção "Command Prompt" (Prompt de comando).
+
+Digitamos aquele comando que já conhecemos:
+
+ping 192.168.3.1
+COPIAR CÓDIGO
+No vídeo, o instrutor se equivoca e pinga o endereço 192.168.3.3, quando, na verdade deveria ter pingado o 192.168.3.1, conforme alterado nesta transcrição. O ping não ia dar certo de qualquer forma, pois estávamos usando um switch, tentando conectar PCs em redes diferentes, problema motivador para passarmos a utilizar o roteador.
+Vamos digitar o "Enter" e aguardar para verificar se o pacote vai ser enviado e vai ser recebido.
+
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+Ping statistics for 192.168.3.3:
+
+Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)
+Os quatro pacotes deram Request timed out, ou seja, não foram entregues. A estatística do nosso ping foi: quatro pacotes foram enviados, quatro pacotes foram perdidos.
+
+Isso significa que, não conseguimos conectar duas ou mais redes diferentes utilizando um switch. Vamos precisar de outro dispositivo: o roteador.
+
+Agora você talvez se pergunte: mas por que usamos o switch?
+
+O switch nos permite conectar múltiplos computadores e máquinas em um mesmo ambiente.
+Por exemplo, seja no escritório, laboratório de uma escola ou em outros setores que haja demanda para conectar diferentes dispositivos em uma única rede.
+
+Apesar do símbolo gráfico do switch no simulador, como é o switch de fato no mundo real? Podemos fechar aqui o prompt de comando e clicar em cima do switch com o botão direito para abrir uma janela com a aparência do switch.
+
+Representação gráfica de um switch de rede. Hardware retangular com 24 portas de conexão enfileiradas lado a lado. Abaixo, 1 porta de console e 1 conexão do cabo de alimentação.
+
+Observe que temos várias portas nas quais podemos conectar múltiplos dispositivos. Então, chega um endereço de rede, criamos uma rede única e conectamos esses múltiplos dispositivos nessa rede.
+
+Roteador
+Já aprendemos que com o switch não vamos conseguir resolver esse problema de conectar redes diferentes em um mesmo ambiente. Vamos ter que usar os roteadores.
+
+Podemos começar já selecionando o roteador. Para isso, clicamos no ícone de "Router" no canto inferior esquerdo na caixa de componentes de rede. Selecionamos especificamente o roteador "1841" e o arrastamos até a tela da área de trabalho.
+
+Observe que todos esses equipamentos que utilizamos são de especificação da Cisco. A Cisco é a empresa que mantém esse software para fins educacionais. No entanto, temos outras fabricantes de dispositivos de rede que podemos eventualmente utilizar em nossos projetos.
+
+Na sequência, vamos aprender como inserir e configurar esse roteador na nossa rede.
+
+https://cdn1.gnarususercontent.com.br/1/1319058/95c69824-a8fe-479e-8ab6-b859998aaa14.png
+
+@@09
+Função da máscara de rede
+
+Você comentou com um amigo que estava estudando redes, então ele perguntou sobre alguns termos diferentes que costuma ouvir quando alguém está falando sobre o tema. Um destes termos é o de máscara.
+Qual explicação você utilizaria para indicar a função da máscara de rede de modo simples?
+
+Estabelecer uma conexão com a internet, informando aos demais dispositivos que seu computador está conectado em uma rede.
+ 
+Alternativa correta
+Como o próprio nome sugere, criar uma máscara para esconder nosso endereço IP na rede.
+ 
+Alternativa correta
+Dividir o endereço IP em dois grupos (rede e máquina) para que seja possível definir quando outro dispositivo estará na mesma rede que a dele.
+ 
+Exatamente! A máscara de rede é usada como forma de comparação para determinar se dois equipamentos estão na mesma rede. Para isso ela vai dividir o endereço IP em dois grupos, de rede e hosts (máquinas).
+
+@@10
+Para saber mais: diferenças entre hubs e switches
+
+Hubs e switches são ambos equipamentos de rede utilizados para interligar computadores e formar uma rede local (LAN - Local Area Network). Eles desempenham a função de concentrar e distribuir o tráfego de rede, mas há diferenças entre eles.
+Comparando os dois, podemos dizer que os switches são mais eficientes e oferecem melhor desempenho em comparação com os hubs. Os hubs são mais adequados para redes pequenas ou para fins de teste, enquanto os switches são mais indicados para redes maiores, onde a velocidade e a capacidade de gerenciamento são importantes.
+
+Caso queira entender mais sobre o assunto, , acesse o artigo Diferenças Entre Hubs e Switches!
+
+https://www.alura.com.br/artigos/diferencas-entre-hubs-e-switches?_gl=1*1d7hj7y*_ga*MTgwMzIzMjk2Ni4xNjg4ODE5OTcz*_ga_59FP0KYKSM*MTY5MDczOTA3OC40MC4xLjE2OTA3NDAxMDkuMC4wLjA.*_fplc*d2s3ZFVrT01PcnF5JTJCRmZPZ1NDUE02YzYwWHVOQ3BWUkFZdFUwZ0pLOXAzS05EMXBtcU9GWTBxVHZZJTJGbDIlMkJGRGxvNlBBeWREYiUyRjJ5RWV0cmhDQms3Y00xUnFlNWZWQUFXVUx5bEtyRmZmM24lMkZzTUVvM1NxS1ZFbTh3WlhqUSUzRCUzRA..
+
+@@11
+Faça como eu fiz: analise o tráfego em sua rede!
+
+Faça o download e instalação do Wireshark em seu computador. Para baixar, acesse o site do Wireshark e selecione a versão compatível com a sua máquina;
+Abra o Wireshark e como fizemos no vídeo, selecione uma interface de rede;
+Para iniciar a captura de pacotes, você precisa clicar na opção “Iniciar captura” no canto esquerdo do menu superior do Wireshark;
+Agora, realize alguma operação de rede, tal como acessar um site no navegador do seu computador;
+Pare a captura de pacotes, clicando na opção “Parar captura” no menu superior do Wireshark;
+Crie algum filtro para facilitar o seu processo de análise, tal como um protocolo específico (HTTP, por exemplo). O filtro também pode ser feito durante a captura de pacotes;
+Analise os pacotes coletados. Lembrando que a inspeção também pode ser realizada durante a captura.
+
+https://www.wireshark.org/
+
+Opinião do instrutor
+
+Você deve ter obtido um resultado bem similar ao da imagem abaixo:
+alt text: Tela do Wireshark com destaque para primeira linha de resultado da captura utilizando o protocolo HTTP como filtro. A tela de resultados é dividida em três partes. A parte superior indica os resultados da busca. A parte intermediária descreve os protocolos envolvidos na operação selecionada (requisição HTTP). A parte inferior detalha os protocolos selecionados na tela intermediária.
+
+Observe que podemos analisar detalhadamente os diferentes protocolos utilizados em uma operação de rede. Para uma visão mais detalhada, basta clicarmos em cada protocolo listado e obtermos mais informações.
+
+https://caelum-online-public.s3.amazonaws.com/3092-redes-conceitos-iniciais-criacao-intranet/image2.png
+
+@@12
+O que aprendemos?
+
+Nessa aula, você aprendeu como:
+Interligar computadores em rede de modo mais seguro utilizando switches;
+Monitorar tráfegos de rede, analisando os diferentes protocolos usados nas operações de rede;
+Observar a atuação dos protocolos nas diferentes camadas de rede;
+Verificar quais dispositivos estão em uma mesma rede, analisando seus endereços IP e suas respectivas máscaras de rede.
