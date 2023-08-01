@@ -1180,3 +1180,671 @@ Interligar computadores em rede de modo mais seguro utilizando switches;
 Monitorar tráfegos de rede, analisando os diferentes protocolos usados nas operações de rede;
 Observar a atuação dos protocolos nas diferentes camadas de rede;
 Verificar quais dispositivos estão em uma mesma rede, analisando seus endereços IP e suas respectivas máscaras de rede.
+
+#### 01/07/2023
+
+@04-Roteadores e endereçamento IP
+
+@@01
+Construindo redes com roteadores
+
+Aprendemos que podemos configurar diferentes redes para atender às demandas dos diferentes setores da linha de produção. Para isso, teremos que utilizar outro dispositivo de rede. Neste caso, teremos que usar o roteador.
+Surge a pergunta: será que basta colocar o roteador, fazer as conexões com os computadores que já temos na linha de produção e tudo vai funcionar? Podemos testar.
+
+Conectar PC e roteador
+Vamos abrir o projeto no Cisco Packet Tracer. Temos os três PCs, um de cada setor da linha de produção. Já havíamos inserido um roteador, selecionamos o 1841 e vamos ter que substituir o switch pelo roteador.
+
+Antes, o que teremos que fazer? Vamos ter que excluir as conexões existentes entre cada PC e o switch. Para isso, clicamos na tecla "Delete" para aparecer uma ferramenta de seleção no cursor do mouse. Assim, podemos clicar nas conexões que queremos deletar. Ao final desse processo, vamos clicar na tecla "ESC", para desativar essa ferramenta de exclusão de conexões e equipamentos.
+
+Vamos posicionar o roteador no topo da estrutura e afastar o switch.
+
+Qual conexão que vamos utilizar para conectar o PC no roteador?
+
+Temos duas questões para refletir nesse processo de seleção. A primeira, eles são equipamentos iguais?
+
+Se são equipamentos iguais, possuem a mesma placa de rede. Já aprendemos que teríamos que usar, via de regra, um cabo de conexão cruzada. Mas, não são iguais.
+
+Ainda assim tem uma segunda reflexão que temos que fazer. Será que essa conexão permite que aproveitemos o máximo que esse dispositivo tem para nos oferecer em termos de conexão?
+
+No caso do roteador, ele permite conectar diferentes redes. Enquanto, um PC permite se conectar a múltiplos dispositivos. Neste caso, teremos que usar a conexão de cabo cruzado.
+Na caixa de componentes de rede, selecionamos "Connections" (conexões) e especificamos o "Copper Cross-Over" que é o cabo cruzado.
+
+Em seguida, clicamos o PC de manufatura, e escolhemos a porta "FastEthernet 0" para ser utilizada. Depois, clicamos no roteador para conectá-los e selecionamos a porta "FastEthernet 0/0".
+
+Na sequência, vamos fazer o mesmo processo para o PC do acabamento. Pegamos outro cabo de conexão cruzado e selecionamos a porta "FastEthernet 0" no PC e "FastEthernet 0/1" no roteador.
+
+Por fim, conectamos o pc de embalagem na porta "FastEthernet 0" com o roteador. Ops! Não temos mais portas para conectar nesse roteador.
+
+O que vamos fazer? Vamos apertar a tecla "ESC" para cancelar essa conexão.
+
+Ao clicar com o botão direito em cima do roteador, se abre uma janela. Na aba "Physical", podemos visualizar uma representação de como é um roteador fisicamente. Claro, todos os dispositivos de rede nessa ferramenta são da Cisco, mas, na prática, podemos usar de diferentes fabricantes.
+
+Representação gráfico de um roteador. Hardware retangular com dois slots, 4 portas, 1 chave de força e 1 conexão do cabo de alimentação.
+
+O que teremos que fazer? Temos alguns slots no equipamento onde podemos adicionar módulos, de tal forma que ganhemos novas portas de conexão. Por exemplo, como a porta Ethernet que precisamos para conectar o PC da embalagem.
+
+Vamos navegar pelo menu lateral esquerdo da aba "Physical" e verificar quais portas que cada módulo nos permite adicionar. Por exemplo, o módulo "WIC-1AM" tem dois RJ-11 conectores. Não é o que queremos.
+
+Se clicamos no módulo "WIC-1ENET", podemos ler na descrição que temos aqui uma porta Ethernet.
+
+Primeiro, é necessário certificar se a chave de força do roteador está desligada.
+Porque ao fazer a conexão de uma nova porta Ethernet, é importante que o equipamento esteja desligado. Quando ligado, uma luz verde aparece abaixo da chave de força, basta clicar na desligá-la.
+
+Após desligada, é possível adicionar o módulo desejado, arrastando e soltando no slot do equipamento. Com isso, temos uma nova porta de conexão Ethernet.
+
+Depois de ligar novamente o dispositivo, é possível fazer a conexão com o cabo de conexão cruzada entre o PC da embalagem na porta "FastEthernet 0" e o roteador na porta "Ethernet 0/1/0".
+
+Simulação de conexão entre diferentes PCs em diferentes redes. A estrutura é organizada em formato piramidal, com um roteador no topo, interligado a três PCs na base por meio de cabos cruzados. Da esquerda para a direita, os PCs estão identificados como Manufatura, Acabamento e Embalagem. A conexão entre os dispositivos está vermelha.
+
+No entanto, todas as conexões estão com indicação vermelha, o que significa que é necessário fazer um passo extra de configuração - diferente do que acontece com switches e hubs, cujas conexões ficam verdes automaticamente.
+
+Conexão com cabo console
+Na prática, se tivéssemos que configurar um roteador em uma linha de produção para dar acesso a PCs de diferentes setores, seria preciso usar um cabo chamado cabo console. Iríamos plugar o PC no roteador usando esse cabo console.
+
+No navegador, vamos procurar uma imagem de cabo console.
+
+Cabo console na cor azul-clara com conector RJ45 em uma ponta e conector DB9 de entrada na outra. O conector DB9 também é conhecido como conexão serial.
+
+Esse cabo tem uma conexão serial (DB9) em uma extremidade e uma conexão do conector RJ45 na outra. A conexão serial é conectada na porta serial de um computador, enquanto o conector RJ45 é plugado no roteador. Caso o computador não tenha uma porta serial, é possível utilizar um conversor USB serial.
+
+Essa comunicação serial transmite 1bit por vez.
+Não basta apenas conectar o cabo console no PC e no roteador. Além disso, é necessário baixar um software de emulação para configuração de dispositivos. Também muito utilizado para configuração remota de servidores, chamado PuTTY.
+
+Tem uma interface simples, onde você pode adicionar um endereço IP do dispositivo que você quer configurar. Usando uma conexão SSH, você pode configurá-la a distância.
+
+Captura de tela de janela de configuração do software Putty. À esquerda, possui um painel com uma lista de categorias e a direita as opções específicas de cada categoria.
+
+Esse software é muito utilizado tanto por profissionais de TI quanto de redes na configuração de dispositivos.
+
+Vamos aprender como seria esse processo na prática usando nosso simulador?
+
+No Cisco Packet Tracer, é possível realizar esse processo adicionando um novo PC ao lado do roteador. Dentre as conexões, vamos escolher o "Console" que é o cabo console.
+
+Nesse novo PC chamado "PC-PT PC1" vamos conectar esse cabo na saída "RS 232" (conector da porta serial) e na porta "Console" do roteador.
+
+Ao clicar com o botão direito para abrir o "PC-PT PC1", acessamos a aba "Desktop" e a opção "Terminal", onde temos a configuração do terminal. Vamos manter no deafult (padrão) ao clicar no botão "OK".
+
+Agora, é possível observar a interface de configuração do roteador. Mas, podemos fechar essa janela.
+
+Se clicamos com o botão direito no roteador na área de trabalho e acessamos a aba "CLI", vamos encontrar a mesma a interface de configuração.
+
+O que isso significa? No caso do simulador, é possível usar a interface adaptada clicando no roteador. Mas, na prática, é necessário fazer toda a conexão usando o cabo console entre o computador e o roteador.
+
+Portanto, ao contrário do switch, é preciso usar um computador para configurar um roteador de modo que as conexões sejam realizadas com sucesso.
+
+Modo de Configuração
+Já que não vamos usar o PC no caso do simulador, podemos excluí-lo. Para isso, apertamos a tecla "Delete", clicamos no "PC-PT PC1" e automaticamente vamos excluir a conexão com o cabo console. Lembre-se de apertar "ESC" para desativar a ferramenta de exclusão.
+
+Se passamos o cursor do mouse sobre o roteador, podemos observar a lista das portas. Todas as portas estão com o estado de Down, ou seja, não estão ativas.
+
+Device Name: Router2
+Device Model: 1841
+Hostname: Router
+Port	Link	VLAN	IP Address	IPv6 Address	MAC Address
+FastEthernet0/0	Down	--	not set	not set	0001.439C.8801
+FastEthernet0/1	Down	--	not set	not set	0001.439c.8802
+Ethernet0/1/0	Down	--	not set	not set	000B.BE4B.53E6
+Vlan1	Down	1	not set	not set	0006.2A22.C285
+Physical Location: Intercity> Home City > Corporate office > Main Wiring Closet > Rack > Router2
+
+Da mesma forma, há um campo para "IP address" (endereço IP), e não há nenhum endereço IP definido para nenhuma das portas.
+
+O que vamos ter que fazer? Vamos ter que mudar o status de cada uma das portas que estamos utilizando: "FastEthernet0/0", "FastEthernet 0/1" e "Ethernet 0/1/0". Em seguida, vamos atribuir um endereço de IP para cada uma dessas portas.
+
+Para isso, vamos configurar o roteador usando a aba "CLI", como havíamos mencionado.
+
+Caso necessário, você pode mudar a fonte do terminal CLI. Na barra de menu superior, selecione "Options > Preferences" (ou "Ctrl + R"). Na nova janela, clique na aba "Font" e aumentar para tamanho 16 a fonte da opção CLI. Na sequência, clique em "Apply".
+Observe que aparece uma pergunta em inglês: "Você gostaria de entrar na configuração de modo diálogo?". Esse é um modo de configuração bem detalhado, passo a passo.
+
+No nosso caso, vamos fazer de forma mais simples e rápida. Por isso, vamos digitar a opção "no" e apertar "Enter".
+
+Would you like to enter the initial configuration dialog? [yes/no]:
+no
+COPIAR CÓDIGO
+Agora, estamos no modo usuário. Mas, para conseguir configurar porta e atribuir endereço de IP, vamos ter que entrar no modo especial. Isto é, vamos ter que escalar um pouco em termos de privilégios. Para isso, vamos usar o comando enable.
+
+enable
+COPIAR CÓDIGO
+Toda vez que digitamos um comando e entramos num modo diferente de uso desse terminal de configuração, podemos inserir o comando ? e para abrir uma lista de comandos executáveis a partir daquele modo.
+Se apertamos "Enter", vão ser exibidos mais comandos. Se apertamos um "Espaço", vai ser exibida a lista completa de comandos que podemos executar naquele modo.
+
+O que queremos é entrar no modo de configuração. Portanto, vamos ter que digitar o seguinte comando:
+
+configure
+COPIAR CÓDIGO
+Após apertar "Enter", nos perguntam se queremos configurar a partir de um terminal, de uma memória, de uma rede. Vamos querer configurar a partir de um terminal.
+
+Configuring from terminal, memory, or network [terminal]?
+terminal
+COPIAR CÓDIGO
+Após digitar "terminal" e apertar "Enter", entramos no modo de configuração. Agora vamos digitar novamente o ponto de interrogação para exibir a lista de comandos que podemos utilizar nesse modo. Vamos dar "Espaço" para visualizar a lista completa.
+
+O que queremos configurar? É uma interface, pois queremos habilitar uma daquelas portas. Por isso, digitamos interface e um ponto de interrogação para mostrar as diferentes interfaces que podemos configurar.
+
+interface ?
+COPIAR CÓDIGO
+O que queremos configurar são essas interfaces Ethernet e FastEthernet. Vamos começar pela FastEthernet.
+
+interface FastEthernet 0/0
+COPIAR CÓDIGO
+Ao dar "Enter", entramos nessa interface. O que podemos fazer? Analisar quais comandos podemos utilizar para configurá-la de modo ativo. Por isso, digitamos novamente o ponto de interrogação e, em seguida, apertamos em "Espaço" para exibir a lista completa.
+
+Existe o comando shutdown que basicamente desliga essa interface. Mas, não há nenhum outro comando que possamos usar diretamente para ligá-la.
+
+Então, qual comando utilizamos? Usamos dois comandos: o comando no, que nega um comando, e o comando shutdown. Ou seja, não desligue a interface "FastEthernet 0/0". Em seguida, damos "Enter".
+
+no shutdown
+COPIAR CÓDIGO
+% LINK-5-CHANGED: Interface FastEthernet0/0, changed state to up
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/0, changed state to up
+
+Assim, já mudamos a configuração da porta. Se observamos a tela da área de trabalho, a conexão entre roteador e o PC de manufatura já ficou verde. Isto é, já habilitamos a interface "FastEthernet 0/0". Contudo, essa interface ainda não tem endereço de IP atribuído.
+
+Vamos clicar em "Enter" e digitar interrogação. Agora, queremos atribuir o endereço de IP para essa porta. Podemos utilizar o comando ip e adicionar uma interrogação.
+
+ip ?
+COPIAR CÓDIGO
+O que podemos usar? Existe o comando ip address para definir o endereço de IP de uma interface. Digitamos ip address seguido de uma interrogação:
+
+ip address ?
+COPIAR CÓDIGO
+O que podemos inserir junto com esse comando? O endereço de IP que queremos atribuir a essa porta, se estivermos utilizando o modo estático de atribuição de endereço IP. Ou se esse modo for o automático, podemos usar, por exemplo: ip address dhcp.
+
+No nosso caso, vamos começar de modo estático. Portanto, vamos ter que inserir o endereço de IP que desejamos atribuir para essa porta. Vamos atribuir então 193.168.3.1 e clicar em "Enter".
+
+ip address 193.168.3.1
+COPIAR CÓDIGO
+% Incomplete command.
+Falta alguma informação. Vamos digitar novamente. Se clicamos com a seta direcional para cima, vamos copiar o comando que usamos anteriormente. No final, vamos incluir uma interrogação para saber o que falta.
+
+ip address 193.168.3.1 ?
+COPIAR CÓDIGO
+Precisamos identificar qual é a máscara de sub-rede que vamos usar para esse endereço de IP.
+
+No caso, estamos usando o endereço IP da classe C, pois é iniciado pelo primeiro octeto 193.
+
+Essa máscara de sub-rede tem quantos octetos 255? Os três primeiros. Vamos completar o comando com 255.255.255.0 e clicar em "Enter".
+
+ip address 193.168.3.1 255.255.255.0
+COPIAR CÓDIGO
+Dessa vez, conseguimos ativar a porta "FastEthernet 0/0" e atribuir o endereço IP para essa porta.
+
+Vamos repetir o mesmo processo para os dois PCs de acabamento e embalagem. Mas, lembre-se que o PC da embalagem não está numa porta "FastEthernet", mas, sim, em uma porta "Ethernet 0/1/0". É só passar o mouse sobre o roteador para conferir o nome da interface que vamos inserir no CLI.
+
+Vamos maxizar o CLI novamente. Ainda estamos no modo de configuração da interface "FastEthernet 0/0". Temos que sair dessa interface para entrar nas demais, não é verdade? Por isso, vamos colocar o comando exit.
+
+exit
+COPIAR CÓDIGO
+Agora, estamos novamente no modo de configuração. Vamos selecionar a próxima interface, no caso "FastEthernet 0/1".
+
+interface fastEthernet 0/1
+COPIAR CÓDIGO
+Agora, replicamos todo o processo com o comando no shutdown.
+
+% LINK-5-CHANGED: Interface FastEthernet0/1, changed state to up
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/1, changed state to up
+
+Agora vamos atribuir o endereço de IP dessa porta e adicionar a máscara de rede:
+
+ip address 193.168.2.1 255.255.255.0
+COPIAR CÓDIGO
+Tudo configurado, Vamos digitar exit para poder configurar a próxima porta.
+
+interface Ethernet0/1/0
+COPIAR CÓDIGO
+Digitamos a interface de Ethernet e depois o no shutdown.
+
+% LINK-5-CHANGED: Interface Ethernet0/1/0, changed state to up
+%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/1/0, changed state to up
+
+Vamos atribuir o endereço de IP e a máscara de rede:
+
+ip address 193.168.4.1 255.255.255.0
+COPIAR CÓDIGO
+Por fim, damos exit novamente.
+
+Depois de configurar todas as portas como ativas e atribuir os seus respectivos endereços de IP, podemos passar o mouse sobre o roteador para verificar que todas as portas estão com status Up e possuem endereços de IP.
+
+Port	Link	VLAN	IP Address	IPv6 Address	MAC Address
+FastEthernet0/0	Up	--	193.168.3.1/24	not set	0001.439C.8801
+FastEthernet0/1	Up	--	193.168.2.1/24	not set	0001.439c.8802
+Ethernet0/1/0	Up	--	193.168.4.1/24	not set	000B.BE4B.53E6
+Vlan1	Down	1	not set	not set	0006.2A22.C285
+Observe que os endereços de IP são diferentes. Têm os dois primeiros octetos iguais, porém o terceiro octeto é diferente. O que isso significa?
+
+Estamos na classe C e acabamos de configurar três redes diferentes, uma para cada setor da linha de produção. Agora, precisamos configurar os IPs dos nossos computadores.
+
+Caso esqueçamos o endereço de IP dessa rede, basta passar o mouse sobre o roteador para lembrar que a FastEthernet 0/0 tem endereço de IP da rede 193.168.3, e o último octeto é dedicado ao host, ou seja, o dispositivo que queremos conectar. No caso, já estamos usando 1 para o roteador. Para os PCs, podemos usar o 2.
+
+Vamos então fazer esse processo para cada um dos computadores. Clicamos com o botão direito em cada computador e selecionamos "Desktop > IP Configuration" para mudar o "IPv4 Address":
+
+PC da manufatura: 193.168.3.2;
+PC da acabamento: 193.168.2.2;
+PC da embalagem: 193.168.4.2.
+Após configurar os IPs, vamos verificar se adicionamos corretamente todos os endereços de rede ao passar o mouse em cima do roteador.
+
+Simulação de conexão entre diferentes PCs em diferentes redes como descrita anteriormente. Agora, a conexão entre os dispositivos está verde.
+
+Podemos fazer um ping para testar se a nossa rede está funcionando de fato.
+
+Clicamos no PC da manufatura e vá na opção "Command Prompt". Vamos dar um ping para o computador da embalagem.
+
+ping 193.168.4.2
+COPIAR CÓDIGO
+Request timed out.
+Request timed out.
+Request timed out.
+Request timed out.
+Ping statistics for 192.168.3.3:
+
+Packets: Sent = 4, Received = 0, Lost = 4 (100% loss)
+As quatro requisições falharam. Ou seja, dos quatro pacotes enviados no comando ping, nenhum foi recebido e não houve qualquer tipo de retorno.
+
+O que aconteceu? Quando damos um comando ping, o PC procura primeiro qual dispositivo naquela rede pode receber aquele pacote de dados. Como esse pacote está sendo enviado para outra rede, precisamos informar ao PC para onde mandar esse pacote.
+
+Até o momento, não configuramos essa informação. Não dissemos ao PC "quando você tem que mandar uma informação para outra rede, envie essa informação para esse endereço". Na sequência, vamos aprender como resolver esse problema.
+
+https://cdn1.gnarususercontent.com.br/1/1319058/2804eeb8-b9ac-4408-b030-e9e8516803a2.png
+
+https://cdn1.gnarususercontent.com.br/1/1319058/6ae4b613-76f2-4ac0-abf0-2d38c41139a4.png
+
+https://cdn1.gnarususercontent.com.br/1/1319058/d3ee1ec5-725e-47be-8507-38c0c096913c.png
+
+https://cdn1.gnarususercontent.com.br/1/1319058/8e665169-d5c0-4513-bdeb-429602616a04.png
+
+https://cdn1.gnarususercontent.com.br/1/1319058/b73c15a9-5826-4502-95a1-06c362409f60.png
+
+@@02
+Comunicação externa
+
+Você criou uma rede com endereço IP: 193.167.2.0 e máscara: 255.255.255.0 interconectando alguns computadores e vai precisar conectar esses dispositivos com redes externas.
+Qual dispositivo de rede você deve adotar para exercer essa função?
+
+Alternativa correta
+Roteador.
+ 
+Exatamente, a principal função dos roteadores é interconectar redes, encaminhando seus pacotes de dados.
+Alternativa correta
+Switch.
+ 
+Alternativa correta
+Hub.
+
+@@03
+Endereços de rede
+
+Ao verificar as conexões de um roteador, você constata que um dos dispositivos conectados possui endereço IP: 33.44.55.66 e máscara de rede: 255.0.0.0.
+Qual dos equipamentos listados abaixo está conectado na mesma rede desse dispositivo?
+
+Alternativa correta
+Equipamento A - IP: 34.44.55.67 e Máscara 255.0.0.0
+ 
+Alternativa correta
+Equipamento B - IP: 33.255.4.3 e Máscara: 255.0.0.0
+ 
+O primeiro octeto do endereço IP é 33, logo só ele me importa para analisar se outro dispositivo está na mesma rede que eu. Os demais são números da máquina. As outras opções começam com número diferente de 33, o que caracteriza que a máquina está em outra rede.
+Alternativa correta
+Equipamento A - IP: 39.44.55.66 e Máscara 255.0.0.0
+
+@@04
+Portão de saída
+
+Nossos pings não conseguiam alcançar do computador da manufatura até o computador da embalagem, correto? Precisamos configurar nosso computador para enviar mensagens para dispositivos externos à nossa rede. Como podemos fazer isso?
+Se acessarmos o menu de contexto do nosso PC Manufatura clicando com o botão direito, abrirá a janela familiar a nós. Vamos selecionar a opção "desktop" e, em seguida, "IP Configuration". Observe que temos um campo chamado "default gateway" (em português, "gateway padrão"), que é o portão de saída para o qual devemos encaminhar mensagens ao sair da nossa rede.
+
+Neste campo, devemos inserir o endereço da porta do roteador à qual nosso computador está conectado.
+
+Dessa forma, configuramos a porta de saída da rede, permitindo que nosso computador envie mensagens, dados e outras informações para computadores e dispositivos externos à nossa rede. Isso possibilita a transmissão de informações além dos limites da nossa rede local.
+
+Para recuperar o endereço IP que atribuímos a uma porta do roteador, o processo é simples: basta clicarmos com o botão direito no roteador do nosso projeto do Packet Tracer, selecionar "enter". Na janela exibida, digitamos o comando enable para entrar no modo de configuração.
+
+enable
+COPIAR CÓDIGO
+Em seguida, digitamos o comando show ip interface e inserimos o nome da interface para a qual desejamos descobrir o endereço IP atribuído. Por exemplo, para a interface FastEthernet0/0, onde o PC da manufatura está conectado, digitamos o comando e pressionamos "Enter".
+
+show ip interface FastEthernet0/0
+COPIAR CÓDIGO
+Como retorno, obtemos:
+
+A tabela abaixo foi parcialmente transcrita. Para conferi-la na íntegra, execute o código na sua máquina.
+FastEthernet0/0 is up, line protocol is up (connected)
+Internet address is 193.168.3.1/24
+
+Broadcast address is 255.255.255.255
+
+Address determined by setup command
+
+Observe que ele mostrou para nós o endereço, que é 193.168.3.1.
+
+Podemos utilizar o atalho "Ctrl+C" para copiar o IP. Em seguida, abrimos a aba de configuração de IP no PC da manufatura e inserimos o endereço IP copiado no campo "default gateway". Dessa forma, estamos configurando essa porta do roteador como o portão de saída para essa rede.
+
+Pressionamos "Enter" para salvar as configurações. Agora vamos testar o ping para verificar se está funcionando corretamente. Acessamos novamente o prompt de comando do PC da manufatura e digitamos o comando ping 193.168.4.2, 0.3 é o endereço da nossa rede, enquanto o endereço da rede do PC da embalagem é 0.4. Vamos enviar o ping agora.
+
+ping 193.168.3.4
+COPIAR CÓDIGO
+Como retorno, obtemos:
+
+Pinging 193.168.4.2 with 32 bytes of data:
+Request timed out.
+
+Request timed out.
+
+Request timed out.
+
+Request timed out.
+
+Ping statistics for 193.168.4.2:
+
+Packets: Sent = 4, Received = 0, Lost = …
+
+O primeiro, segundo, terceiro e possivelmente o quarto pings não obtiveram resposta. Você deve estar se perguntando: "O que está acontecendo?". Nosso PC está enviando o ping para o portão de saída do roteador, que por sua vez está encaminhando-o para o PC da embalagem.
+
+No entanto, não configuramos no PC da embalagem qual é a porta de saída daquela rede. Isso significa que o ping está chegando lá, mas não está sendo reencaminhado porque o computador da embalagem não possui essa informação sobre a porta de saída da sua rede.
+
+Agora, vamos repetir esse mesmo processo para todos os PCs. No entanto, há uma maneira mais simples de descobrir o endereço IP das portas do roteador. Como mencionei anteriormente, basta passarmos o mouse sobre o roteador da nossa rede no Packet Tracer e ele mostrará os IPs atribuídos para cada uma das portas.
+
+Apenas queria demonstrar que nós também podemos utilizar esse comando para obter o endereço IP de forma mais rápida e também para copiar e colar.
+
+Vamos clicar no PC de Acabamento e acessar "IP Configuration". A rede nesse computador é 193.168.2.1, que é o portão de saída dessa rede. Portanto, preenchemos o campo "Default Gateway" com esse IP. Agora, no PC de Embalagem, faremos o mesmo procedimento de "IP Configuration" e o endereço será 193.168.4.1.
+
+PC Acabamento
+Default Gateway: 193.168.2.1
+PC Embalagem:
+Default Gateway: 193.168.4.1.
+Pressionamos "Enter".
+
+Agora, vamos realizar o teste de ping novamente do PC da Manufatura para o PC da Embalagem. Para isso, clicamos no PC da Manufatura, e na aba "Desktop" selecionamos "Command Prompt". Vamos verificar se agora funciona digitando o comando ping 193.168.4.2.
+
+ping 193.168.4.2
+COPIAR CÓDIGO
+Como retorno, obtemos:
+
+Pinging 193.168.4.2 with 32 bytes of data:
+Reply from 193.168.4.2: bytes=32 time-6ms TTL-127
+
+Reply from 193.168.4.2: bytes=32 time<lms TTL-127
+
+Reply from 193.168.4.2: bytes=32 time<lms TTL=127
+
+Reply from 193.168.4.2: bytes=32 time<lms TTL-127
+
+Ping statistics for 193.168.4.2:
+
+Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+
+Approximate round trip times in milli-seconds:
+
+Minimum Oms, Maximum = 6ms, Average = 1ms
+
+Observe que agora recebemos uma resposta. Isso significa que os quatro pacotes foram enviados e recebidos corretamente.
+
+Agora que identificamos e corrigimos o problema, surge a pergunta: será que é possível realizar todo esse processo de atribuição de endereço IP de forma automática?
+
+Vamos ver sobre isso na sequência. Até mais!
+
+@@05
+Default gateway
+
+Uma amiga estava testando a criação de quatro sub-redes usando um roteador em um ambiente de simulação, tal como o Cisco Packet Tracer. Ao testar a conectividade entre computadores em redes diferentes utilizando o ping, ela percebe um erro. Os pacotes encaminhados não alcançam o destino. Nesse momento, você aponta que talvez ela não tenha configurado o default gateway das redes.
+Qual argumento você utilizaria para explicar esse apontamento?
+
+ você utilizaria para explicar esse apontamento?
+
+Alternativa correta
+O default gateway garante o acesso remoto dos equipamentos conectados em uma rede.
+ 
+Alternativa correta
+O default gateway é utilizado no encaminhamento de pacotes entre a rede local e redes externas, sendo o “portão de saída” de uma rede.
+ 
+O default gateway é o endereço IP responsável por encaminhar pacotes para redes externas.
+Alternativa correta
+O default gateway é usado para bloquear acessos maliciosos na rede.
+
+@@06
+IPv4, IPv6 e classes de IP
+
+Até o momento, utilizamos uma série de endereços IP para a configuração das nossas máquinas e o endereçamento delas nas redes, mas não fizemos nenhuma reflexão. Será que podemos usar qualquer sequência de 4 octetos? Podemos, por exemplo, fazer uma sequência como 999.0.0.0? Essa é uma sequência válida? Nesse vídeo, descobriremos que não!
+Nós temos 4 octetos e utilizamos 32 bits para fazer o endereçamento de IP. Com esses 32 bits, conseguimos fazer a identificação única de 4,3 bilhões de dispositivos ao redor do mundo. Porém, existem muito mais que 4,3 bilhões de computadores hoje em dia.
+
+Logo, a versão 4 do protocolo IP precisou ser modificada, evoluindo para uma nova versão conhecida como IPv6 (versão 6 do protocolo IP), que utiliza 128 bits para endereçamento dos dispositivos. Assim, é possível endereçar até 1 decilhão de dispositivos.
+
+Você deve estar se perguntando: por que estamos usando o IPv4 se precisamos usar IPv6, dado o volume de máquinas que temos? Algumas redes e dispositivos ainda foram criados utilizando o padrão IPv4, então usamos uma técnica chamada tunelamento para fazer o encapsulamento de um endereço IPv6 e encaminhar isso através de uma rede IPv4. Chegando ao destino, esse pacote é desencapsulado e então temos o endereçamento IPv6 da máquina de destino.
+
+Não entraremos em muitos detalhes técnicos sobre o protocolo IPv6, no entanto, basta saber que ele utiliza uma abordagem hierárquica para a atribuição dos endereços.
+
+O protocolo IPv4, que estamos utilizando na construção de redes, é dividido em algumas classes, ou seja, conjuntos de endereços. Surge a primeira pergunta: há um limite inferior ou superior de endereços, isto é, de sequências numéricas que podemos utilizar nos octetos?
+
+Descobriremos que sim! Mas quais são esses limites?
+
+Limites de endereço no IPv4
+Quanto ao limite inferior, não existem endereços de IP negativos, logo, os endereços devem ser superiores à sequência de zero nos quatro octetos (0.0.0.0). Da mesma forma, temos um limite superior: os endereços devem ser inferiores à sequência de 255 em todos os quatro octetos (255.255.255.255).
+
+Classe A
+No IPv4, os endereços estão distribuídos em cinco classes diferentes. Vamos começar pela primeira: a classe A. Na classe A, temos endereços de IP que começam o primeiro octeto com sequências que vão de 1 a 126.
+
+Nessa classe, temos como máscara de rede padrão o formato 255.0.0.0. A máscara de rede nos permite identificar, a partir de um endereço de IP da classe, qual é o endereço da rede na qual o dispositivo se encontra.
+
+Vamos analisar um exemplo prático: temos o endereço de IP 123.145.3.3, que pertence à classe A, visto que o primeiro octeto é iniciado com a sequência 123. Qual seria o endereço de rede desse dispositivo?
+
+Basta observar na máscara de rede padrão quais octetos estão ocupados pela sequência de 255. Fazendo a subtração e preenchendo os demais octetos com zero, nós obtemos o endereço de rede na qual esse dispositivo está conectado, ou seja, 123.0.0.0.
+
+O endereço de rede acima não pode ser atribuído a nenhum dispositivo da nossa rede, logo, ele é dedicado à identificação dessa rede específica.
+Além do endereço de rede, dedicado à identificação da rede, temos outro endereço: o de broadcast, para o qual o dispositivo envia um pacote de mensagem que quer encaminhar para os demais da mesma rede em que ele está conectado. Inclusive, ao enviar para esse endereço, o próprio dispositivo recebe o pacote de mensagem enviado.
+
+Para obter o endereço de broadcast, basta pensarmos de forma oposta a como obtemos o endereço de rede. Ao invés de preencher os demais octetos com 0, vamos preencher com 255, ou seja, 123.255.255.255.
+
+Assim, conseguimos estabelecer um limite inferior e um limite superior da nossa rede, que são os endereços dedicados primeiro à rede e depois ao broadcast.
+
+Classe B
+Temos também a classe B, onde temos os endereços IP que possuem como primeiro octeto uma sequência de 128 até 191. Já a máscara padrão dessa classe é 255.255.0.0. Essa máscara é importante para identificar o endereço da rede de um dispositivo conectado com o endereço IP da classe B e também o endereço de broadcast dessa rede.
+
+Agora, vamos usar como exemplo o seguinte endereço IP da classe B: 135.145.3.3. Qual seria o endereço da rede na qual o dispositivo está conectado?
+
+O exercício é o mesmo, mas agora os dois primeiros octetos são dedicados à identificação da rede e os demais são preenchidos com 0, obtendo 135.145.0.0.
+
+Para encontrar o endereço de broadcast, preenchemos os demais octetos com 255, então obtemos 135.145.255.255.
+
+Dessa forma, identificamos o endereço da rede e de broadcast de um endereço de IP na classe B.
+
+Classe C
+Agora, vamos à classe C. Ela é formada por dispositivos que apresentam no seu primeiro octeto uma sequência de 192 até 223. Como máscara de rede padrão, ela possui uma sequência de 255 nos três primeiros octetos, sendo apenas o último octeto utilizado para identificar os dispositivos conectados na rede, então temos 255.255.255.0.
+
+A máscara de rede nos permite analisar quantos dispositivos nós podemos conectar nessa rede específica. No caso da classe C, podemos ter várias redes diferentes e poucos dispositivos conectados em cada uma delas.
+
+Observando a máscara de rede padrão da classe A, temos um único octeto para a identificação da rede, e os demais podem ser utilizados para identificar os dispositivos. Portanto, na classe A, podemos agregar o maior número possível de dispositivos em uma rede.
+
+Então, como descobrir o endereço de rede e o endereço broadcast de um dispositivo conectado com o endereço IP da classe C? Vamos usar o exemplo do endereço 193.168.3.3.
+
+Para encontrar o endereço dessa rede, basta modificar o último octeto para 0, obtendo 193.168.3.0. De modo similar, para encontrar o endereço broadcast da rede, substituímos o último octeto pela sequência 255, ou seja, 193.168.3.255.
+
+Classes D e E
+Além das anteriores, temos duas outras classes que são especiais, as quais não utilizamos na identificação dos dispositivos computacionais no dia a dia. São a classes D e E.
+
+A classe D é formada por endereços de IP que apresentam o seu primeiro octeto no intervalo de 224 a 239. Ela é muito utilizada, por exemplo, para multicast, ou seja, para encaminhar mensagens a grupos de dispositivos específicos em uma rede.
+
+Já a classe E é formada por endereços que apresentam o seu primeiro octeto no intervalo de 240 até 255. Essa classe é utilizada para fins de pesquisa e desenvolvimento em redes.
+
+Conclusão
+Agora sabemos como usar um endereço de IP, os seus limites e as classes, sendo algumas delas inclusive reservadas, conforme abordado anteriormente.
+
+Em relação ao endereço de IP, ainda há mais um detalhe: a questão de IP público e IP privado. Será que o endereço que usamos na rede é de fato o endereço da nossa máquina? Vamos analisar isso na sequência!
+
+@@07
+Limitações IPv4
+
+Apesar da simplicidade do endereçamento IPv4, representado por uma sequência de quatro octetos (por exemplo: 193.186.6.1), o processo de alocação e atribuição de endereços tem se tornado cada vez mais complexo devido a uma limitação de versão do protocolo.
+Assinale a alternativa que indica tal limitação:
+
+Diferentes padrões de máscara de rede adotados em cada classe.
+ 
+A diferença entre os padrões de máscara de rede adotados em cada classe não constitui uma limitação do IPv4. Como vimos, é uma facilidade que permite a criação de redes com diferentes perfis.
+Alternativa correta
+Número de bits adotado no endereçamento.
+ 
+O IPv4 usa endereços de 32 bits, possibilitando um total aproximado de 4,3 bilhões de endereços únicos. Com a evolução do número de dispositivos conectados em rede, esse limite é insuficiente, tornando o processo de atribuição de endereços mais complexo. Com isso, surgiu uma nova versão do protocolo IP - conhecida como IPv6 - com capacidade de atribuir endereços únicos a undecilhões de dispositivos.
+Alternativa correta
+Alocação do endereço de rede e broadcast, indisponibilizando seu uso por equipamentos conectados na rede.
+
+08
+Classes IP
+
+Os endereços IP (Internet Protocol) são usados para identificar e localizar dispositivos em uma rede IP. Existem diferentes formas de criar endereços IP para computadores. Imagine que você está criando uma rede de um laboratório de informática e precisa definir como será o endereçamento IP das máquinas.
+Quais são as classes de endereços IP que podem ser usadas neste caso?
+
+Classe A, B e D.
+ 
+Alternativa correta
+Classe A, B e C.
+ 
+A IETF (Internet Engineering Task Force) determinou que existiriam ao todo 5 classes de endereços IP, indo de ordem alfabética da classe A até a classe E. Porém as duas últimas classes não são usadas para endereçar as máquinas conectadas em um ambiente como laboratório de informática ou escritório, apenas em usos mais reservados (multicast e experimentos).
+Alternativa correta
+Classe A, B e E.
+ 
+Parabéns, você acertou!
+
+
+09
+Identificando classes
+
+Ao verificar o endereço IP do seu computador na rede usando o comando ipconfig /all no prompt de comando do Windows, você obtém o IP 190.145.49.3 e máscara de rede 255.255.0.0.
+Esse endereço pertence a qual classe?
+
+Classe C.
+ 
+Alternativa correta
+Classe A.
+ 
+Alternativa correta
+Classe B.
+ 
+A classe "B" possui o primeiro octeto variando de 128 a 191. Dessa forma, pelo fato do número 190 se encontrar dentro de 128 a 191, sabemos que é um endereço da classe "B".
+
+10
+Endereço de Rede e Broadcast
+
+Você tem a informação de que uma máquina possui endereço IP 9.8.9.8, com máscara de rede 255.0.0.0.
+Qual seria o endereço da rede na qual essa máquina está conectada e seu respectivo endereço de broadcast?
+
+Rede: 9.0.0.0 e Broadcast: 9.255.0.255
+ 
+Alternativa correta
+Rede: 9.0.0.0 e Broadcast: 9.255.255.255
+ 
+Como fazemos para descobrir o endereço de rede que esse endereço IP está inserido?
+Basta substituirmos o 255 da máscara de rede pelo o octeto correspondente do endereço IP. Neste caso, teremos: 9.0.0.0 :)
+E para descobrir o endereço de broadcast da rede?
+Pegamos o endereço de rede e substituímos os octetos com 0’s (originais da máscara) pelo octeto 255. Sendo assim, obteremos: 9.255.255.255
+Alternativa correta
+Rede: 9.8.0.0 e Broadcast: 9.8.0.255
+
+@@11
+IP público e privado
+
+Como conseguimos nos conectar à internet?
+Para estabelecer uma conexão com a internet, é necessário que nosso provedor de serviços de internet atribua um endereço à nossa rede, permitindo a troca de informações e a visualização de nossa rede por outros computadores, possibilitando que respondam às nossas solicitações. Nesse sentido, há uma distinção entre os endereços de IP público e privado, dentro de cada classe de endereços IP.
+
+IP público e IP privado
+IP público = conexão externa na internet
+IP privado = identificação de dispositivos em rede interna
+
+Os endereços IP públicos são usados para estabelecer a conexão externa com a internet, enquanto os endereços IP privados são empregados para identificar dispositivos em redes internas. Dentro de cada classe de endereço IP, existem conjuntos específicos de endereços designados como endereços IP privados.
+
+Conforme vimos, não há nada extremamente confidencial. A única distinção é que esse conjunto de endereços é exclusivamente utilizado para identificar dispositivos em uma rede privada, ou seja, destinado somente para comunicação interna dentro dessa rede.
+
+IP privado
+Classe A: 10.0.0.0
+Classe B: 172.16.0.0 a 172.31.0.0
+
+Classe C: 192.68.0.0
+
+Dentro da classe A de endereços IP, os endereços IP privados são aqueles em que o primeiro octeto começa com 10. Na classe B, o conjunto de endereços IP privados varia do primeiro octeto 172.16 até a sequência dos dois primeiros octetos 172.31. Já na classe C, temos um conjunto de endereços IP privados em que os dois primeiros octetos começam com 192.68.
+
+Entendemos a distinção entre endereço IP privado e endereço IP público em todas as classes. Podemos, agora, realizar um teste prático para verificar qual é o endereço IP atribuído ao nosso computador e qual endereço IP é visível para dispositivos externos à nossa rede.
+
+Testando o IP da nossa máquina
+Para realizar o teste, vamos abrir o prompt de comando digitando "prompt" ao clicarmos no botão do Windows (ou do sistema operacional que você esteja usando). Em seguida, digitaremos o comando ipconfig /all.
+
+ipconfig /all
+COPIAR CÓDIGO
+Esse comando nos fornecerá uma série de informações, incluindo o endereço IP que estamos usando para identificar nossa máquina na rede interna. Dentre as informações temos o endereço IP que foi identificado: 192.168.1.117. Também foi exibida a máscara de rede.
+
+O retorno abaixo foi parcialmente transcrito. Para conferi-lo na íntegra, execute o código na sua máquina.
+Adaptador Ethernet Ethernet
+Sufixo DNS específico de conexão.
+
+Descrição: Intel(R) Ethernet Controller (3) 1225-V
+
+Endereço Físico: D8-5E-D3-85-95-4B
+
+DHCP Habilitado : Sim
+
+Configuração Automática Habilitada : Sim
+
+Endereço IPv6 de link local : fe80::4db5:f496: 8b0a:6f77% 3 (Preferencial)
+
+Endereço IPv4 : 192.168.1.117(Preferencial)
+
+Máscara de Sub-rede : 255.255.252.0
+
+Concessão Obtida : quarta-feira, 26 de abril de 2023 15:42:2
+
+Assim, identificamos que estamos usando a classe C.
+
+Agora, vamos verificar na internet, utilizando um dos sites que utilizamos para testar a velocidade de conexão, qual endereço IP está sendo identificado para o nosso dispositivo a partir da rede externa. Vamos lá.
+
+Vamos prosseguir abrindo o navegador, no caso, o Google Chrome, e acessando o endereço meuip.com.br. Neste site, podemos identificar o endereço IP associado ao nosso dispositivo. Observem que ao entrarmos no site já é identificado o IP.
+
+Meu ip é 177.8.171.44
+É importante observar que esse endereço IP, obtido no site, pode ser bastante diferente daquele que obtivemos ao executar o comando ipconfig.
+
+Isso ocorre porque o endereço IP que obtivemos no site é o endereço IP público que estamos utilizando para nos conectarmos à internet. Por outro lado, na nossa rede privada, temos um endereço IP diferente que é utilizado para identificar nossa máquina internamente.
+
+Essa distinção entre endereços IP público e privado é comum e necessária para o correto funcionamento das redes.
+
+Agora que compreendemos a distinção entre endereço IP público e endereço IP privado, vamos prosseguir com o nosso projeto? Até mais!
+
+@@12
+IP privado e internet
+
+Um colega de trabalho questiona sobre a diferença entre o IP identificado por um site que exibe endereços IP de computadores e o endereço IP exibido pelo comando ipconfig no prompt de comando do Windows desse mesmo computador.
+Qual seria a explicação que você utilizaria para justificar essa diferença?
+
+O comando ipconfig está exibindo o IP público do computador, enquanto o site está exibindo o IP privado.
+ 
+Alternativa correta
+O comando ipconfig está exibindo o IP privado usado apenas para comunicação na rede local, enquanto o site está exibindo o IP público.
+ 
+Os endereços IP privados são usados para comunicação somente em redes locais, de acordo com a especificação, eles não podem ser usados para comunicação na internet por exemplo. Os IPs privados são convertidos em IPs públicos pelo método de tradução NAT. Os IPs públicos são fornecidos pelos provedores de serviços de rede.
+Alternativa correta
+O site está gerando IPs aleatórios para exibir.
+
+@@13
+Faça como eu fiz: crie e teste outros casos de rede!
+
+Explore o que já aprendemos até aqui e crie outros casos de rede no simulador Cisco Packet Tracer.
+Você pode também utilizar outros roteadores e switches para conectar diferentes dispositivos.
+
+Aproveite o simulador para aprender explorando diferentes possibilidades, analise a operação das redes no modo de simulação. Verifique os protocolos que estão sendo executados no painel lateral direito que surge quando estamos no modo de simulação.
+
+Opinião do instrutor
+
+O melhor jeito de desenvolver habilidades no mundo tech é pondo a mão na massa, fazendo experiências e testando possibilidades.
+
+@@14
+Para saber mais: entendendo o IPv6
+
+Durante nosso aprendizado, falamos brevemente a respeito dessa nova versão do protocolo IP, o IPv6. Caso queira se aprofundar neste tema, você pode acessar o artigo Entendendo o IPv6, disponível na plataforma da Alura!
+Leia aqui o trecho inicial do artigo:
+
+“Uma empresa de hospedagem está enfrentando um problema: o número de endereços IPs disponíveis está acabando. Sem endereços IPs, a empresa não pode ter novos clientes. Essa empresa possui cerca de 5000 servidores dedicados para os clientes. Cada servidor tem um IP público, por isso ela tem uma faixa de IPs para comportá-los. Por exemplo, uma faixa de 250.127.1.x a 250.127.20.x endereços disponíveis.[...]”
+
+https://www.alura.com.br/artigos/entendendo-o-ipv6?_gl=1*z3aa6q*_ga*MTgwMzIzMjk2Ni4xNjg4ODE5OTcz*_ga_59FP0KYKSM*MTY5MDg3ODgwNS40NC4xLjE2OTA4ODE2ODEuMC4wLjA.*_fplc*b0p4aUhKQ1YwR2VzOXV0WTN1JTJGeHhGOHFjTEpIVVRjbDglMkJEZHhVbVozS3BFJTJCbTlIYVZxNzZKNlAlMkJwN0w1ZUk0a3pITkdzY2h2Z252V3V0JTJGMnRLeUdqMnZCOGNOQ3MlMkZvdW53RkVlZ2FIelRyWUZhNSUyRldEbllWTTlTNkRwMEElM0QlM0Q.
+
+@@15
+O que aprendemos?
+
+Nessa aula, você aprendeu como:
+Construir e operar redes usando roteadores como dispositivo de interligação, permitindo a comunicação de redes locais com redes externas;
+Criar sub redes usando roteadores;
+Configurar o default gateway de uma rede;
+Observar as regras do protocolo IP na atribuição de endereços aos equipamentos interligados em uma rede.
