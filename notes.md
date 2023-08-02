@@ -2020,8 +2020,6 @@ Nosso próximo passo é adicionar um servidor que pode armazenar e informar algu
 
 @@02
 Atribuição de IP
-PRÓXIMA ATIVIDADE
-
 Analisamos diferentes formas de atribuição de endereços IP a máquinas (clientes) em uma rede. No caso do uso de um servidor DHCP, o modo de atribuição é bem mais prático por ser automático.
 Como é conhecido esse modo de atribuição?
 
@@ -2036,8 +2034,6 @@ IP privado.
 
 @@03
 Solicitando IP
-PRÓXIMA ATIVIDADE
-
 Você vai a um novo supermercado em sua cidade e utiliza a rede wifi disponível para acessar a internet em seu smartphone. A rede wifi é formada por alguns roteadores e seu smartphone está configurado para receber IP dinâmico.
 Sendo assim, como seu smartphone fará a requisição para que um desses roteadores possa fornecer um endereço IP?
 
@@ -2140,8 +2136,6 @@ Surge a seguinte questão: como proceder para não precisar digitar o endereço 
 
 @@05
 Atribuição de IP
-PRÓXIMA ATIVIDADE
-
 No projeto que estamos construindo, incluímos uma máquina que identificamos como servidor web. A identificação não foi mero acaso, a escolhemos porque ela exerce uma função muito importante em nosso cotidiano, por exemplo, ao acessarmos uma página na internet.
 Qual é essa função?
 
@@ -2156,8 +2150,6 @@ Criar camadas de segurança em uma rede.
 
 @@07
 Servidores DNS
-PRÓXIMA ATIVIDADE
-
 No projeto que construímos ao longo dessa aula, foram necessárias a inclusão e configuração de um servidor DNS para que um usuário na intranet pudesse digitar www.fabrica.com no browser e assim, acessar a página da Fábrica hospedada no servidor interno.
 A partir dessa experiência, qual função você destacaria como principal de um servidor DNS?
 
@@ -2172,8 +2164,6 @@ Configuração adequada de IP para todos os clientes (máquinas ou dispositivos)
 
 @@08
 Faça como eu fiz: explore o que fizemos até aqui!
-PRÓXIMA ATIVIDADE
-
 Aproveite o exemplo que construímos ao longo do curso como base para explorar diferentes alternativas de redes internas.
 Um bom caminho é tentar refazer e aprimorar o nosso exemplo. Você pode mudar os endereços IP atribuídos de modo estático, explorar as configurações do roteador e incluir novos dispositivos computacionais e de rede.
 
@@ -2183,8 +2173,6 @@ Uma boa forma de consolidar aquilo que exploramos até aqui é refazendo nossos 
 
 @@09
 Para saber mais: configurando DHCP em roteadores CISCO
-PRÓXIMA ATIVIDADE
-
 Imagine se você estivesse configurando a rede de uma empresa na qual existem dez computadores e um servidor. Todos eles seriam conectados a um switch que, por sua vez, estaria conectado a um roteador.
 Como seria o processo de configuração DHCP do roteador dessa rede? Confira o artigo Configurando DHCP em roteadores CISCO para entender a solução.
 
@@ -2192,8 +2180,6 @@ https://www.alura.com.br/artigos/como-configurar-dhcp-em-roteadores-cisco?_gl=1*
 
 @@10
 O que aprendemos?
-PRÓXIMA ATIVIDADE
-
 Nessa aula, você aprendeu como:
 Utilizar o protocolo DHCP para atribuição automática de endereços IP;
 Construir uma intranet com servidores;
