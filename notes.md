@@ -1848,3 +1848,364 @@ Construir e operar redes usando roteadores como dispositivo de interligação, p
 Criar sub redes usando roteadores;
 Configurar o default gateway de uma rede;
 Observar as regras do protocolo IP na atribuição de endereços aos equipamentos interligados em uma rede.
+
+#### 02/08/2023
+
+@05-Construindo redes locais com servidores
+
+@@01
+Atribuição automática de IP com DHCP
+
+Surgiu uma nova demanda na nossa fábrica: nós teremos que adicionar um novo PC para cada setor da linha de produção, ou seja, vamos praticamente dobrar a fábrica. Como faremos isso?
+Para começar, vamos analisar os dispositivos que estamos usando no projeto.
+
+Nós temos um roteador (1841 Router2), o qual possui três portas. Inclusive, tivemos que adicionar um módulo a mais para ter uma porta que conectasse o PC na embalagem. Temos também o switch (2950-24 Switch), que por enquanto está um pouco de lado no projeto.
+
+Como teremos 6 PCs, precisaremos usar um dispositivo que tenha mais portas de saída. Então, talvez uma boa alternativa seja usar o switch.
+
+Além disso, temos um problema: configurar o IP para cada um dos PCs manualmente daria muito trabalho. Nesse caso, podemos utilizar o protocolo DHCP (Dynamic Host Configuration Protocol), que significa configuração dinâmica de host. Ou seja, é um protocolo que basicamente atribui para os PCs e outros dispositivos um endereço IP conforme a rede de conexão.
+
+Para o DHCP funcionar, precisamos de uma espécie de servidor, o qual funciona no roteador. Então, o roteador funciona como um servidor DHCP. Abordaremos isso em breve!
+
+Configurando um servidor DNS
+Vamos mudar a configuração da nossa rede. Com a tecla "Delete" pressionada, vamos deletar as conexões que temos no momento. Em seguida, adicionaremos três novos PCs: um PC para manufatura, outro para acabamento, e um último para embalagem.
+
+Agora vamos renomear as máquinas, obtendo os seguintes resultados:
+
+PC-PT Manufatura 1;
+PC-PT Manufatura 2;
+PC-PT Acabamento 1;
+PC-PT Acabamento 2;
+PC-PT Embalagem 1;
+PC-PT Embalagem 2.
+Por fim, ajustamos a posição de todos os dispositivos para ficarem visíveis lado a lado.
+
+Já temos os nossos 6 dispositivos. Nosso próximo passo é conectar cada um deles ao switch.
+
+Ao clicar com o botão direito sobre o switch, conseguimos identificar 24 portas para conexão com o conector RJ45, usando o protocolo Ethernet. Então, no nosso caso, ele será bastante útil. Já o nosso roteador tem somente 2 portas.
+
+Vamos fazer a conexão física entre os PCs da linha de produção com o switch. Nesse caso, usamos o cabo de conexão direta.
+
+Devemos conectar em sequência: Manufatura 1 a FastEthernet0/1; Manufatura 2 a FastEthernet0/2, Acabamento 1 a FastEthernet0/3, e assim por diante.
+
+Nesse momento, não precisamos memorizar as portas nas quais estamos conectando, porque todo o processo de configuração será de modo automático.
+Agora teremos que conectar o roteador no switch. Para isso, também vamos utilizar um cabo de conexão direta. A conexão será do FastEthernet0/7 até o FastEthernet0/0.
+
+Quando as conexões ficam verdes, significa que estão funcionando. No nosso caso, todas ficaram, inclusive a do roteador que já estava habilitada. Caso não estivesse, nós poderíamos habilitá-la.
+
+Posicionando o cursor sobre o roteador, conseguimos identificar que a porta está habilitada e já tem um endereço de IP atribuído.
+Reiniciamos o nosso roteador e agora teremos que configurar todas as suas portas. Vamos aproveitar para fazer a configuração de DHCP.
+
+Para isso, clicamos com o botão direito sobre o roteador e abrimos novamente a aba CLI. No comando, temos a pergunta se queremos inicializar no modo de configuração de diálogo; vamos responder que não, conforme exibido abaixo.
+
+Would you like to enter the initial configuration dialog? (yes/no): no
+COPIAR CÓDIGO
+Em seguida, vamos elevar nossos privilégios, alterando para o modo de configuração com o comando enable. Após teclar "Enter", vamos digitar configure terminal para entrar no modo de configuração.
+
+enable
+COPIAR CÓDIGO
+configure terminal
+COPIAR CÓDIGO
+Agora vamos verificar quais comandos podemos utilizar para fazer a configuração de DHCP. Observando a lista retornada após o último comando, nós temos o ip ("Global IP configuration subcommands").
+
+Então, vamos digitar ip seguido de um ponto de interrogação (?) para verificar quais desses comandos nós podemos usar.
+
+ip ?
+COPIAR CÓDIGO
+Observe que temos um IP dhcp, que podemos usar para configurar um servidor DHCP ("Configure DJCP server and relay").
+
+ip dhcp ?
+COPIAR CÓDIGO
+Para configurar o servidor, vamos digitar o comando ip dhcp seguido da opção pool. Precisaremos nomear o pool de endereços que nós vamos poder atribuir a todos os dispositivos que estarão conectados à nossa rede. Vamos definir esse nome como fabrica, finalizando o comando com um ponto de interrogação.
+
+ip dhcp pool fabrica ?
+COPIAR CÓDIGO
+Basicamente, é isso que precisamos atribuir. Observe que, após digitar o comando acima, teremos um <cr> como retorno; isso significa que já informamos todas as informações necessárias para o comando, então podemos teclar "Enter". Ao fazer isso, entramos no modo de configuração DHCP.
+
+Router(config)#ip dhcp pool fabrica ?
+  <cr>
+Router(config)#ip dhcp pool fabrica
+Router(dhcp-config)#
+COPIAR CÓDIGO
+Agora vamos usar novamente o comando ? para verificar o que podemos configurar.
+
+Router(dhcp-config)#?
+  default-router  Default routers
+  dns-server      Set name server
+  domain-name     Domain name
+  exit            Exit from DHCP pool configuration mode
+  network         Network number and mask
+  no              Negate a command or set its defaults
+  option          Raw DHCP option
+COPIAR CÓDIGO
+Primeiro, nós podemos configurar a network, pois ainda não atribuímos o endereço da rede. Então, vamos usar o comando network e digitar o endereço da rede 193.168.3.0, que faz parte da classe C.
+
+network 193.168.3.0
+COPIAR CÓDIGO
+Feito isso, será exigida a informação da máscara de rede, conforme exibido acima. Nesse caso, vamos digitar 255.255.255.0.
+
+network 193.168.3.0 255.255.255.0
+COPIAR CÓDIGO
+Agora que atribuímos o endereço para a rede que acabamos de configurar no modo DHCP, precisamos informar qual é o portão de saída dessa rede, isto é, o default-router (roteador padrão). Usaremos então o comando default-router seguido da interrogação.
+
+default-router ?
+COPIAR CÓDIGO
+É esperado um endereço de IP do default-router. Para fazer isso, vamos atribuir o mesmo endereço para a porta na qual estaremos conectando todos os dispositivos. Então, vamos inserir o endereço de IP da rede como 193.168.3.1 com a porta FastEthernet0/0.
+
+default-router 193.168.3.1
+COPIAR CÓDIGO
+Nesse momento, temos todas as configurações necessárias para o funcionamento do DHCP na nossa rede. Agora resta atribuir o mesmo endereço inserido no default-router para a porta FastEthernet0/0.
+
+Nós já sabemos como fazer isso: primeiro saímos do modo atual com o comando exit e alteramos para o modo de configuração. Em seguida, entramos em interface fastEthernet0/0.
+
+Router(dhcp-config)#exit
+Router(config)#interface fastEthernet0/0
+COPIAR CÓDIGO
+Após entrar na interface, precisamos ativá-la, porque ela está desligada, então digitamos o comando no shutdown. Abaixo, o comando e seu retorno:
+
+Router(config-if)#no shutdown
+
+Router(config-if)#
+%LINK-5-CHANGED: Interface FastEthernet0/0, changed state to up
+
+%LINEPROTO-5-UPDOWN: Line protocol on Interface
+FastEthernet0/0, changed state to up
+COPIAR CÓDIGO
+Finalizada a ativação, vamos atribuir um endereço IP para essa interface. Então, digitamos o comando ip address seguido do endereço 193.168.3.1, exatamente o mesmo que inserimos como default-router. Lembre-se de informar também a máscara de rede, que será na classe C (255.255.255.0).
+
+ip address 193.168.3.1 255.255.255.0
+COPIAR CÓDIGO
+Agora é hora de ativar o modo DHCP em todos os dispositivos da rede, ou seja, em todos os PCs da linha de produção. Vamos fechar a janela do CLI do roteador e clicar com o botão direito sobre o PC Manufatura 1. Em "Desktop > IP Configuration", observe que o PC está no modo estático (Static); vamos alterar para o modo DHCP.
+
+Feito isso, aparece a mensagem "Requesting IP Address", indicando que está sendo requisitado o endereço IP. Finalizado o processo, teremos a mensagem "DHCP request successful".
+
+Observe as informações que foram incluídas na seção "IP Configuration":
+
+IPv4 Address: 193.168.3.3
+Subnet Mask: 255.255.255.0
+Default Gateway: 193.168.3.1
+DNS Server: 0.0.0.0
+Primeiro, foi obtido um endereço IP de forma automática, conversando com o roteador que nós adicionamos à rede. Além disso, o endereço foi automaticamente configurado com o portão de saída dessa rede ("Default Gateway").
+
+Como funcionou esse processo?
+Quando ativamos o modo DHCP, o PC enviou uma mensagem como um broadcast (transmissão) para todos os dispositivos, perguntando qual dispositivo nessa rede poderia fornecer um endereço IP para ele.
+
+O nosso servidor DHCP, que é o roteador, responde que pode fornecê-lo, e o computador responde que irá usá-lo. O roteador, por sua vez, responde que o computador pode usar o endereço.
+
+Então temos basicamente uma troca de mensagens na rede. Por isso, observamos na tela esse processo de requisição de DHCP. Esse processo nada mais é do que uma troca de dados entre o PC e o roteador da rede, ou seja, o roteador faz o papel de servidor DHCP.
+
+Agora vamos replicar esse processo para todos os PCs.
+
+Alterando o modo de estático para DHCP no PC Manufatura 2, será feito o processo de requisição, mas vamos obter um endereço de IP diferente.
+
+IPv4 Address: 193.168.3.4
+Subnet Mask: 255.255.255.0
+Default Gateway: 193.168.3.1
+DNS Server: 0.0.0.0
+No PC Acabamento 1, teremos o endereço IP 193.168.3.5; no Acabamento 2, o endereço 193.168.3.6; no Embalagem 1, 193.168.3.7; e por último, no PC Embalagem 2, o endereço 193.168.3.8. A porta de saída foi assumida corretamente para todos, que foi exatamente o endereço atribuído à porta FastEthernet0/0.
+
+Agora podemos testar! Vamos mandar, por exemplo, um ping do computador Manufatura 1 para o computador Embalagem 2. Para isso, clicamos com o botão direito sobre o PC Manufatura 1, acessamos o prompt de comando (Command Prompt), e digitamos o comando abaixo:
+
+ping 193.169.3.8
+COPIAR CÓDIGO
+Se o ping chegar corretamente ao PC Embalagem 2, teremos o seguinte retorno:
+
+Ping statistic for 193.168.3.8:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss), Approximate round trip times in milli-seconds:
+    Minimum= 0ms, Maximum = 7ms, Average = 2ms
+COPIAR CÓDIGO
+Configuramos o DHCP com sucesso na nossa rede!
+
+Nosso próximo passo é adicionar um servidor que pode armazenar e informar alguns dados para os computadores que temos na nossa rede da linha de produção. Vamos lá?!
+
+@@02
+Atribuição de IP
+PRÓXIMA ATIVIDADE
+
+Analisamos diferentes formas de atribuição de endereços IP a máquinas (clientes) em uma rede. No caso do uso de um servidor DHCP, o modo de atribuição é bem mais prático por ser automático.
+Como é conhecido esse modo de atribuição?
+
+IP dinâmico.
+ 
+Quando um endereço IP é atribuído a uma máquina, dizemos que a configuração foi dinamicamente alocada. Os servidores DHCP normalmente possuem o que chamamos de “lease time”, ou seja, possui um tempo de alocação de um endereço IP a uma máquina, quando esse tempo é expirado é preciso ocorrer uma renovação de endereço IP. Por isso ele é dinamicamente alocado.
+Alternativa correta
+IP estático.
+ 
+Alternativa correta
+IP privado.
+
+@@03
+Solicitando IP
+PRÓXIMA ATIVIDADE
+
+Você vai a um novo supermercado em sua cidade e utiliza a rede wifi disponível para acessar a internet em seu smartphone. A rede wifi é formada por alguns roteadores e seu smartphone está configurado para receber IP dinâmico.
+Sendo assim, como seu smartphone fará a requisição para que um desses roteadores possa fornecer um endereço IP?
+
+Broadcast.
+ 
+Quando um dispositivo não possui endereço IP ele não sabe a quem perguntar, então ele precisa verificar entre dispositivos da mesma rede quem poderá fornecer um endereço IP. Quando essa comunicação é feita para todos, chamamos isso de Broadcast.
+Alternativa correta
+Unicast.
+ 
+Alternativa correta
+Multicast.
+
+@@04
+Criando uma intranet com servidor web
+
+Vamos imaginar que precisamos adicionar um servidor à linha de produção, de modo que possamos centralizar alguns dados e também dar uma visualização sobre o que acontece nos diferentes PCs conectados com as diferentes máquinas no processo de produção.
+Criando uma intranet com servidor web
+Para começar, precisamos adicionar um servidor. Então, vamos acessar a ferramenta e seguir com o nosso projeto, a partir da configuração que deixamos anteriormente. Vamos clicar na opção "End devices" no canto inferior esquerdo (atalho: "Ctrl + Alt + V") e selecionar o "Server", ou seja, o servidor. Nós podemos renomeá-lo como "Servidor fábrica".
+
+O próximo passo é conectar esse servidor à rede interna. Uma boa opção é utilizar um switch, pois caso seja necessário instalar novos servidores ou outros PCs do lado administrativo, por exemplo, teremos mais portas, conforme visto anteriormente.
+
+Então, vamos clicar na opção "Switches", no canto inferior esquerdo, e selecionar o mesmo switch que usamos para a rede da fábrica, o 2950-24.
+
+Agora vamos fazer as conexões físicas entre o servidor, o switch e o roteador. Da mesma forma, vamos utilizar cabos diretos de conexão. Primeiro, conectamos o servidor na porta FastEthernet0 com a FastEthernet0/1 do switch. Por último, vamos conectar a porta FastEthernet0/2 do switch na FastEthernet0/1 do roteador.
+
+Fizemos a conexão, mas ainda precisamos configurar essa porta no roteador, então vamos clicar com o botão direito sobre ele. A princípio, estaremos no modo de usuário, mas queremos entrar no modo configure terminal. Para isso, enviamos o comando enable e depois o configure terminal.
+
+enable
+COPIAR CÓDIGO
+configure terminal
+COPIAR CÓDIGO
+Na sequência, adicionaremos outro comando. Caso tenha dúvida, basta usar o comando do ponto de interrogação (?). No nosso caso, queremos configurar a interface fastEthernet 0/1, afinal, a fastEthernet 0/0 já está configurada.
+
+interface fastEthernet 0/1
+COPIAR CÓDIGO
+Agora temos a seguinte questão: devemos atribuir um endereço estático ou dinâmico? Como nós teremos poucas máquinas e máquinas mais dedicadas desse lado, vamos atribuir os endereços de forma estática.
+
+Para isso, digitamos o comando ip address seguido do endereço, que pode ser 9.9.9.1. Também precisamos inserir a máscara de sub-rede. Conforme visto anteriormente, a máscara da classe A tem 255 no primeiro octeto e 0 nos demais.
+
+ip address 9.9.9.1 255.0.0.0
+COPIAR CÓDIGO
+Uma vez configurada a porta com o endereço de IP, falta ativá-la com o comando no shutdown.
+
+no shutdown
+COPIAR CÓDIGO
+Agora a porta está ativa e com o endereço de IP atribuído.
+
+O instrutor inverteu a ordem dos processos, mas o resultado foi o mesmo.
+Na sequência, vamos fechar o CLI do roteador e acessar o servidor para configurar seu endereço de IP. Para isso, acessaremos a aba "Desktop" e clicaremos na opção "IP Configuration".
+
+Vamos utilizar a configuração estática (Static). Como endereço de IP, podemos usar, por exemplo, 9.0.255.255. Parece estranho, mas vimos que esse endereço é normal e plenamente atribuível, e nesse caso, usamos o endereço de IP da rede na qual estamos conectando na porta do roteador. A máscara de IP será preenchida automaticamente ao teclar "Enter" (255.0.0.0).
+
+Na opção "Default Gateway", começaremos configurando a atribuição estática do endereço IP. Para isso, precisamos inserir o IP da porta FastEthernet0/1 do roteador, que é 9.9.9.1.
+
+Após inserir o endereço IP e pressionar "Enter" para confirmar a ação, percebemos que as conexões ficam verdes, indicando que estão funcionando corretamente.
+
+Para testar se a conexão funciona, faremos um ping a partir do computador. Para isso, basta acessar o prompt de comando e digitar o comando abaixo:
+
+ping 9.0.255.255
+COPIAR CÓDIGO
+Observe que, no resultado do ping, o primeiro pacote não chegou, mas os três pacotes subsequentes chegaram ao servidor e retornaram corretamente. Isso significa que o servidor está conectado.
+
+Agora, queremos disponibilizar uma página web com informações para a intranet da empresa. Para isso, vamos clicar no servidor, acessar a aba "Services", e no menu lateral esquerdo, selecionar a opção "HTTP".
+
+Ao clicar nessa opção, teremos acesso a uma série de arquivos. Vamos editar o arquivo da linha 5, chamado index.html. Clicando na opção "(edit)" à direita do arquivo, será aberto um código HTML que poderá ser modificado:
+
+<html>
+<center><font size='+2' color='blue'>Cisco Packet Tracer</font></center>
+<hr>Welcome to Cisco Packet Tracer. Opening doors to new opportunities. Mind Wide Open.
+<p>Quick Links:
+<br><a href='helloworld.html'>A small page</a>
+<br><a href='copyrights.html'>Copyrights</a>
+<br><a href='image.html'>Image page</a>
+<br><a href='cscoptlogo177x111.jpg'>Image</a>
+</html>
+COPIAR CÓDIGO
+Por exemplo: onde está escrito "Cisco Packet Tracer", podemos substituir por "Fabrica". Além disso, onde está o texto "Welcome to Cisco Packet Tracer. Opening doors to new opportunities. Mind Wide Open.", vamos alterar para "Dados de fabricacao". Também podemos substituir "Quick Links" por "Setores".
+
+Abaixo dessas informações, temos os endereços de arquivos .html incluídos no próprio servidor.
+<html>
+<center><font size='+2' color='blue'>Fabrica</font></center>
+<hr>Dados de fabricacao
+<p>Setores:
+<br><a href='helloworld.html'>A small page</a>
+<br><a href='copyrights.html'>Copyrights</a>
+<br><a href='image.html'>Image page</a>
+<br><a href='cscoptlogo177x111.jpg'>Image</a>
+</html>
+COPIAR CÓDIGO
+Finalizadas as alterações, podemos clicar no botão "Save" no canto inferior direito.
+
+Com essas modificações, a página web estará disponível na intranet da empresa com as informações desejadas. Vamos testar isso clicando sobre o PC Manufatura 1 e acessando a opção "Web Browser" na aba "Desktop". Uma vez aberto o navegador, vamos digitar o endereço IP do servidor, que é 9.0.255.255.
+
+Será retornada justamente a página que acabamos de configurar em HTML. Se quisermos, podemos configurar mais, criar outras páginas, e inserir novas informações, como dados do processo de fabricação, dados de cada um dos setores, e assim por diante.
+
+Porém, observe que nosso servidor de rede funciona corretamente e consegue disponibilizar algumas páginas internas da companhia.
+
+Conclusão
+Surge a seguinte questão: como proceder para não precisar digitar o endereço IP do servidor no navegador para acessar às páginas armazenadas? Será que conseguimos colocar um nome de domínio facilmente memorizável? Descobriremos na sequência!
+
+@@05
+Atribuição de IP
+PRÓXIMA ATIVIDADE
+
+No projeto que estamos construindo, incluímos uma máquina que identificamos como servidor web. A identificação não foi mero acaso, a escolhemos porque ela exerce uma função muito importante em nosso cotidiano, por exemplo, ao acessarmos uma página na internet.
+Qual é essa função?
+
+Hospedar páginas e aplicações na web, tais como sites e aplicativos para smartphones.
+ 
+Um servidor web armazena arquivos que fazem parte de um site, por exemplo, e os disponibiliza para outras máquinas e dispositivos (também chamados de clientes).
+Alternativa correta
+Receber e encaminhar requisições de acesso para dispositivos corretos, traduzindo domínios em endereços IP.
+ 
+Alternativa correta
+Criar camadas de segurança em uma rede.
+
+@@07
+Servidores DNS
+PRÓXIMA ATIVIDADE
+
+No projeto que construímos ao longo dessa aula, foram necessárias a inclusão e configuração de um servidor DNS para que um usuário na intranet pudesse digitar www.fabrica.com no browser e assim, acessar a página da Fábrica hospedada no servidor interno.
+A partir dessa experiência, qual função você destacaria como principal de um servidor DNS?
+
+Tradução de domínios para endereços de IP.
+ 
+Um servidor DNS é feito única e exclusivamente para a tradução de domínios para endereços de IP. Desse modo, sua função não é hospedar sites ou aplicações, mas sim permitir que as requisições cheguem aos locais corretos.
+Alternativa correta
+Hospedar sites ou aplicações que criamos, tornando-os acessíveis para outras máquinas.
+ 
+Alternativa correta
+Configuração adequada de IP para todos os clientes (máquinas ou dispositivos) e servidores conectados em uma rede.
+
+@@08
+Faça como eu fiz: explore o que fizemos até aqui!
+PRÓXIMA ATIVIDADE
+
+Aproveite o exemplo que construímos ao longo do curso como base para explorar diferentes alternativas de redes internas.
+Um bom caminho é tentar refazer e aprimorar o nosso exemplo. Você pode mudar os endereços IP atribuídos de modo estático, explorar as configurações do roteador e incluir novos dispositivos computacionais e de rede.
+
+Além disso, você pode experimentar configurar as páginas web exibidas no servidor. Consulte mais sobre HTML para entender como configurar a página exibida na intranet.
+
+Uma boa forma de consolidar aquilo que exploramos até aqui é refazendo nossos exemplos e aprimorando alguns detalhes. Caso tenha dúvidas, você também pode consultar nossa comunidade no fórum da Alura e no Discord, além de tirar dúvidas de outros colegas.
+
+@@09
+Para saber mais: configurando DHCP em roteadores CISCO
+PRÓXIMA ATIVIDADE
+
+Imagine se você estivesse configurando a rede de uma empresa na qual existem dez computadores e um servidor. Todos eles seriam conectados a um switch que, por sua vez, estaria conectado a um roteador.
+Como seria o processo de configuração DHCP do roteador dessa rede? Confira o artigo Configurando DHCP em roteadores CISCO para entender a solução.
+
+https://www.alura.com.br/artigos/como-configurar-dhcp-em-roteadores-cisco?_gl=1*1qbvs2*_ga*MTIyNjMzOTI1LjE2OTA5NjAyNjY.*_ga_59FP0KYKSM*MTY5MDk4OTQ2OC42LjEuMTY5MDk5MDQzOS4wLjAuMA..*_fplc*T1lwMjk1MkNnRmRBeEFjUUtVdzIxZHBNS3FyaGdUSFNJWUxncHk0RzU2cUY5akYxOG55TGVrSFR4UjYwckpiV3RQbmExSjN2aGYzME1qc2gxRWdXSzhkV2h3RzdyWjhtSTRkUjdMTFF2MU9OWUhnWW01VmU5WmVaUms0RnN3JTNEJTNE
+
+@@10
+O que aprendemos?
+PRÓXIMA ATIVIDADE
+
+Nessa aula, você aprendeu como:
+Utilizar o protocolo DHCP para atribuição automática de endereços IP;
+Construir uma intranet com servidores;
+Configurar servidores web em uma intranet para armazenar páginas e arquivos;
+Configurar e usar um servidor DNS para traduzir endereços de IP numéricos em nomes de domínio legíveis.
+
+@@11
+Conclusão
+
+Parabéns pela finalização do curso! Lembre-se de finalizar as atividades para atingir 100% de conclusão. Que tal rever um pouco dessa nossa primeira jornada no mundo de redes?
+Começamos a jornada compreendendo aspectos práticos de redes de computadores e analisando como a internet funciona na prática. Na sequência, iniciamos a implementação de pequenas redes, usando o simulador e testando a conexão entre dispositivos.
+
+Nesse ponto, surge um desafio: implementar uma rede corporativa no contexto de uma fábrica têxtil. A partir disso, iniciamos a configuração de roteadores, analisamos aspectos técnicos do endereçamento IP e, por fim, conectamos servidores na nossa rede e configuramos protocolos como DHCP e DNS.
+
+Não se esqueça de avaliar o curso e deixar um feedback. Bons estudos e nos vemos na próxima!
